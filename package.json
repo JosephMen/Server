@@ -1,0 +1,37 @@
+{
+  "name": "mys",
+  "version": "1.0.0",
+  "description": "API Server for grocerys store DB",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "start": "nodemon index.js",
+    "proof": "nodemon proof2.js"
+  },
+  "author": "Frander Joseph Mena",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^2.0.22",
+    "pg": "^8.11.0",
+    "vitest": "^1.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "standard": "^17.1.0",
+    "supertest": "^6.3.3"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json"
+  }
+}

@@ -1,0 +1,22 @@
+@port=3000
+POST http://localhost:{{port}}/venta
+Content-Type: application/json
+
+{
+    "descripcion": "Fecha nueva desde node 2",
+    "total": 300,
+    "ganancia": 100
+}
+###
+PATCH  http://localhost:{{port}}/venta/2
+Content-Type: application/json
+
+{
+    "descripcion": "Dragon ball zeta",
+    "total": 300,
+    "ganancia": 100,
+    "esCredito": true
+}
+
+###
+GET http://localhost:{{port}}/venta

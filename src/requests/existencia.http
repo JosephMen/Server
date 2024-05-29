@@ -1,0 +1,27 @@
+GET http://localhost:3000/existencia
+
+###
+GET http://localhost:3000/existencia/7
+###
+POST http://localhost:3000/existencia
+Content-Type: application/json
+
+{
+    "productoid": 67,
+    "stock": 2,
+    "costo": 25,
+    "precio": 30,
+    "fechaentrada": "01-30-2023"
+}
+
+###
+PATCH http://localhost:3000/existencia/7
+Content-Type: application/json
+
+{
+    "productoid": 75,
+    "stock": 5
+}
+
+###
+delete http://localhost:3000/existencia/7
