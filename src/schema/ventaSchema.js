@@ -1,6 +1,6 @@
 import z from 'zod'
 import dateFormat from '../utils/dateFormat.js'
-import { BadArgumentsError, SchemaObjectError } from '../middlewares/error/errorClasses.js'
+import { BadArgumentsError, BadSchemaObjectError } from '../middlewares/error/errorClasses.js'
 import zodErrorBuilder from '../utils/zodErrorBuilder.js'
 const format = (valor) => {
   try {
@@ -59,7 +59,7 @@ export const ventaSchemaUtil = {
    * @param {Number} param.precioTotal
    */
   addProductoVenta ({ costoTotal, precioTotal, gananciaTotal }) {
-    if (!costoTotal || !precioTotal || !gananciaTotal) throw new SchemaObjectError('Argumentos necesarios para realizar calculo')
+    if (!costoTotal || !precioTotal || !gananciaTotal) throw new BadSchemaObjectError('Argumentos necesarios para realizar calculo')
     this.costo += costoTotal
     this.total += precioTotal
     this.ganancia += gananciaTotal
@@ -72,7 +72,7 @@ export const ventaSchemaUtil = {
    * @param {Number} param.precioTotal
    */
   removeProdVenta ({ costoTotal, precioTotal, gananciaTotal }) {
-    if (!costoTotal || !precioTotal || !gananciaTotal) throw new SchemaObjectError('Argumentos necesarios para realizar calculo')
+    if (!costoTotal || !precioTotal || !gananciaTotal) throw new BadSchemaObjectError('Argumentos necesarios para realizar calculo')
     this.costo -= costoTotal
     this.ganancia -= gananciaTotal
     this.total -= precioTotal

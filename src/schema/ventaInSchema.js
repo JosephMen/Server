@@ -1,6 +1,6 @@
 import z from 'zod'
 import zodErrorBuilder, { arrayZodErrorBuilderMessage } from '../utils/zodErrorBuilder.js'
-import { BadSchemaObjectError } from '../middlewares/error/errorClasses'
+import { BadSchemaObjectError } from '../middlewares/error/errorClasses.js'
 
 const ventaInSchema = z.object({
   descripcion: z.string().max(50).default(''),
@@ -18,7 +18,6 @@ export const listaProductoInSchema = productosInSchema.array()
 export const validateArrayProdVInSchema = (object) => {
   const result = listaProductoInSchema.safeParse(object)
   if (!result.success) {
-    console.log(result.error)
     const errorMessage = arrayZodErrorBuilderMessage(result.error)
     throw new BadSchemaObjectError(errorMessage)
   }

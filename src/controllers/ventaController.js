@@ -3,7 +3,7 @@ import ventaSchema from '../schema/ventaSchema.js'
 import VentaService from '../services/VentaService.js'
 import AppError from '../middlewares/error/AppError.js'
 import { messageSuccessCreator } from '../utils/messageCreator.js'
-import ventaInSchema, { validateArrayProdVInSchema, validateVentaInSchema } from '../schema/ventaInSchema.js'
+import { validateArrayProdVInSchema, validateVentaInSchema } from '../schema/ventaInSchema.js'
 
 export default class VentaController {
   #ventaService
@@ -42,26 +42,26 @@ export default class VentaController {
     }
   }
 
-  validateVentaIn = (req, res, next) => {
+  validateVentaReq = (req, res, next) => {
     try {
-      const { ventaIn, listProdVIn } = req.body
-      const dataVenta = validateVentaInSchema(ventaIn)
-      const dataLista = validateArrayProdVInSchema(listProdVIn)
-      req.body.ventaIn = dataVenta
-      req.body.listProdVIn = dataLista
+      const { venta, listaProductos } = req.body
+      const dataVenta = validateVentaInSchema(venta)
+      const dataLista = validateArrayProdVInSchema(listaProductos)
+      req.body.venta = dataVenta
+      req.body.listaProductos = dataLista
       return next()
     } catch (e) {
       return next(new AppError(e, 'Error con los argumentos para la creacion de venta'))
     }
   }
 
-  validateUpdateVentaIn = (req, res, next) => {
+  validateUpdateVentaReq = (req, res, next) => {
     try {
-      const { listProdVIn } = req.body
+      const { listaProductos } = req.body
       const id = Number.parseInt(req.params.id)
       if (isNaN(id)) throw new BadArgumentsError('Id debe ser un numero')
-      const dataLista = validateArrayProdVInSchema(listProdVIn)
-      req.body.listProdVIn = dataLista
+      const dataLista = validateArrayProdVInSchema(listaProductos)
+      req.body.listaProductos = dataLista
       req.body.ventaId = id
       return next()
     } catch (e) {
@@ -76,21 +76,21 @@ export default class VentaController {
    * @param {import('express').NextFunction} next
    * @returns
    */
-  addVentaIn = async (req, res, next) => {
+  addVenta = async (req, res, next) => {
     try {
-      const { ventaIn, listProdVIn } = req.body
-      const listaProductosVenta = listProdVIn
+      const { venta: ventaIn, listaProductos: listaProductosVenta } = req.body
       const venta = await this.#ventaService.addTransact({ listaProductosVenta, ventaIn })
       const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
       return res.json(message)
     } catch (e) {
+      console.log(e)
       return next(new AppError(e, 'Error al agregar detalles de venta'))
     }
   }
 
-  updateVentaIn = async (req, res, next) => {
+  updateVenta = async (req, res, next) => {
     try {
-      const { id: ventaId, prodVListIn } = req.body
+      const { ventaId, listaProductos: prodVListIn } = req.body
       const venta = await this.#ventaService.updateTransact({ ventaId, prodVListIn })
       const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
       return res.json(message)

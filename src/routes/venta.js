@@ -13,10 +13,10 @@ const createVentaRouter = ({ ventaController }) => {
   ventaRouter.get('/:id', ventaController.get)
 
   ventaRouter.post('/', dateFormatterMid, ventaController.validateAddBody, ventaController.add)
-  ventaRouter.post('/detail', ventaController.validateVentaIn, ventaController.add)
+  ventaRouter.post('/detail', ventaController.validateVentaReq, ventaController.add)
 
   ventaRouter.patch('/:id', dateFormatterMid, ventaController.validateUpdateBody, ventaController.update)
-  ventaRouter.patch('/detail/:id', ventaController.validateUpdateVentaIn, ventaController.update)
+  ventaRouter.patch('/detail/:id', ventaController.validateUpdateVentaReq, ventaController.update)
 
   ventaRouter.delete('/:id', ventaController.delete)
   return ventaRouter
