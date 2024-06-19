@@ -103,102 +103,100 @@ export default class VentaService {
    *
    * @param {Object} param0
    * @param {Number} param0.id id del registro a actualizar
-   * @param {Array<productoVentaIn>} param0.prodVListIn datos a actualizar
-   * @param {import('pg').PoolClient} cliente cliente con el que se realizan las queries de lectura
-   * @returns {Promise<Venta>}
+   * @param {Array<productoVentaIn>} param0.productosVenta datos a actualizar
+   * @returns {Promise<venta>}
    */
-  updateTransact = async ({ ventaId, prodVListIn, cliente }) => {
-    return await this.#doTransaction(this.update, { ventaId, prodVListIn, cliente })
+  updateTransact = async ({ ventaIn, productosVenta }) => {
+    return await this.#doTransaction(this.update, { ventaIn, productosVenta })
   }
 
   /**
    * @param {Object} param0
    * @param {ventaIn} param0.ventaIn los datos necesarios para crear un registro de venta
-   * @param {Array<productoVentaIn>} param0.listaProductosVenta productos que conforman una venta
+   * @param {Array<productoVentaIn>} param0.productosVenta productos que conforman una venta
    * @returns {Promise<ventaHecha>} Detalles de la venta
    */
-  addTransact = async ({ listaProductosVenta, ventaIn, cliente }) => {
-    return await this.#doTransaction(this.add, { listaProductosVenta, ventaIn, cliente })
+  addTransact = async ({ productosVenta, ventaIn }) => {
+    return await this.#doTransaction(this.add, { productosVenta, ventaIn })
   }
 
   /**
    *
    * @param {Object} param0
-   * @param {Array<productoVentaIn>} param0.listaProductosVenta productos que conforman una venta
+   * @param {Array<productoVentaIn>} param0.productosVenta productos que conforman una venta
    * @param {ventaIn} param0.ventaIn los datos necesarios para crear un registro de venta
    * @param {import('pg').PoolClient} param0.cliente cliente con el que se realizan los queries de escritura
    * @returns {Promise<ventaHecha>} Detalles de la venta
    */
-  add = async ({ listaProductosVenta, ventaIn, cliente }) => {
+  add = async ({ productosVenta, ventaIn, cliente }) => {
     const venta = { ...ventaSchemaUtil, ...ventaIn }
     venta.id = await this.#ventaModelo.add(venta)
-    for (const prodVentaIn of listaProductosVenta) {
-      const existencia = await this.#existenciaService.obtener(prodVentaIn.existenciaId)
+    for (const producto of productosVenta) {
+      const existencia = await this.#existenciaService.obtener(producto.existenciaId)
 
-      if (existencia === null) throw new BadArgumentsError('No hay registro de existencia con ese id: ' + prodVentaIn.existenciaId)
-      if (existencia.stock < prodVentaIn.cantidad) throw new BadArgumentsError('No hay suficiente existencia disponible')
+      if (existencia === null) throw new BadArgumentsError('No hay registro de existencia con ese id: ' + producto.existenciaId)
+      if (existencia.stock < producto.cantidad) throw new BadArgumentsError('No hay suficiente existencia disponible')
 
-      const productoVenta = await this.#productoVentaService.agregar({ prodVentaIn, existencia, cliente })
-      existencia.stock -= prodVentaIn.cantidad
+      const productoVenta = await this.#productoVentaService.agregar({ productoVentaIn: producto, existencia, cliente })
+      existencia.stock -= producto.cantidad
       await this.#existenciaService.actualizar({ existencia, cliente })
       venta.addProductoVenta(productoVenta)
     }
     await this.#ventaModelo.update({ id: venta.id, data: venta, cliente })
-    return { venta, productosVenta: listaProductosVenta }
+    return { venta, productosVenta }
   }
 
   /**
    *
    * @param {Object} param0
-   * @param {Number} param0.id id del registro a actualizar
-   * @param {Array<productoVentaIn>} param0.prodVListIn datos a actualizar
+   * @param {ventaIn} param0.ventaIn datos de la venta
+   * @param {Array<productoVentaIn>} param0.productosVenta datos a actualizar
    * @param {import('pg').PoolClient} cliente cliente con el que se realizan las queries de lectura
-   * @returns {Promise<Venta>}
+   * @returns {Promise<venta>}
    */
-  update = async ({ ventaId, prodVListIn, cliente }) => {
-    const actualProdVList = await this.#productoVentaService.obtenerTodos({ ventaId })
-    const venta = await this.#ventaModelo.get(ventaId)
-    const ventaAct = { ...ventaSchemaUtil, ...venta }
+  update = async ({ ventaIn, productosVenta, cliente }) => {
+    const productosVentaDB = await this.#productoVentaService.obtenerTodos({ ventaId: ventaIn.id })
+    const ventaDB = await this.#ventaModelo.get(ventaIn.id)
+    const ventaAct = { ...ventaSchemaUtil, ...ventaDB, ...ventaIn }
 
-    for (const prodVIn of prodVListIn) {
-      const prodVAct = actualProdVList.find(pvAct => pvAct.existenciaId === prodVIn.existenciaId)
-      const existencia = await this.#existenciaService.obtener(prodVAct?.existenciaId ?? -1)
-      if (existencia === null) throw new BadArgumentsError('No hay registro de existencia con ese id: ' + prodVIn.existenciaId)
+    for (const producto of productosVenta) {
+      const productoDB = productosVentaDB.find(pvDB => pvDB.existenciaId === producto.existenciaId)
+      const existencia = await this.#existenciaService.obtener(producto.existenciaId)
+      if (existencia === null) throw new BadArgumentsError('No hay registro de existencia con ese id: ' + producto.existenciaId)
 
-      if (!prodVAct) {
-        existencia.stock -= prodVIn.cantidad
+      if (!productoDB) {
+        existencia.stock -= producto.cantidad
         if (existencia.stock < 0) throw new BadArgumentsError('No hay suficiente existencia para suplir demanda')
-        prodVIn.costoUnitario = existencia.costo
-        prodVIn.precioUnitario = existencia.precio
-        const productoVenta = await this.#productoVentaService.actualizar({ prodVIn, cliente })
+        producto.costoUnitario = existencia.costo
+        producto.precioUnitario = existencia.precio
+        const productoVenta = await this.#productoVentaService.actualizar({ prodVIn: producto, cliente })
         await this.#existenciaService.actualizar(existencia)
         ventaAct.addProductoVenta(productoVenta)
         continue
       }
 
-      if (prodVAct.cantidad === prodVIn.cantidad) continue
+      if (productoDB.cantidad === producto.cantidad) continue
 
-      existencia.stock += (prodVAct.cantidad - prodVIn.cantidad)
+      existencia.stock += (productoDB.cantidad - producto.cantidad)
       if (existencia.stock < 0) throw new BadArgumentsError('No hay suficiente existencia para suplir demanda')
 
-      ventaAct.removeProdVenta(prodVAct)
-      const nuevoProductoVenta = await this.#productoVentaService.actualizar({ prodVIn, prodVAct, cliente })
+      ventaAct.removeProdVenta(productoDB)
+      const nuevoProductoVenta = await this.#productoVentaService.actualizar({ prodVIn: producto, prodVAct: productoDB, cliente })
       ventaAct.addProductoVenta(nuevoProductoVenta)
     }
 
-    for (const actProdV of actualProdVList) {
-      const existe = prodVListIn.findIndex(pvi => pvi.existenciaId === actProdV.existenciaId) !== -1
-      if (existe) continue
-      ventaAct.removeProdVenta(actProdV)
-      await this.#productoVentaService.eliminar(actProdV)
+    for (const prodDB of productosVentaDB) {
+      const permanece = productosVenta.findIndex(pv => pv.existenciaId === prodDB.existenciaId) !== -1
+      if (permanece) continue
+      ventaAct.removeProdVenta(prodDB)
+      await this.#productoVentaService.eliminar(prodDB)
     }
-    this.#ventaModelo.update({ id: ventaAct.id, datos: ventaAct, cliente })
+    await this.#ventaModelo.update({ id: ventaAct.id, datos: ventaAct, cliente })
     return ventaAct
   }
 
   /**
    * @param id identificador de la venta
-   * @returns {Promise<Object>}
    */
   get = async (id) => {
     return await this.#ventaModelo.get(id)

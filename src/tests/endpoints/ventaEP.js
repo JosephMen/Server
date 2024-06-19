@@ -9,7 +9,9 @@ const ventaService = {
     return [{ nombre: 'venta' }, { nombre: 'venta2' }]
   },
   get: () => { return { nombre: 'venta' } },
-  delete: () => true
+  delete: () => true,
+  updateTransact: param => param,
+  addTransact: param => param
 }
 
 const ventaController = new VentaController({ ventaService })
@@ -19,11 +21,11 @@ app.use(urlencoded({
   extended: true
 }))
 app.use(json())
-app.use(errorHandler.handle)
 app.use('/venta', createVentaRouter({ ventaController }))
 app.use('*', (req, res) => {
   return res.status(404).send('Ruta no encontrada')
 })
+app.use(errorHandler.handle)
 
 const puerto = 3001
 app.listen(puerto, () => {

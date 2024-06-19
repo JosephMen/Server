@@ -1,7 +1,7 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest'
 import VentaService from '../../services/VentaService'
 import existencia from '../../schema/existenciaSchema'
-import { productoVentaUtil } from '../../schema/productoVentaSchema'
+import { productoVentaSchemaUtil } from '../../schema/productoVentaSchema'
 import { ventaSchemaUtil } from '../../schema/ventaSchema'
 
 const cliente = {
@@ -34,7 +34,6 @@ const ventaIn = {
 }
 const ventaExpected = {
   id: 1,
-  fechaRealizada: '2024-1-1',
   descripcion: 'una cabra',
   clienteId: null,
   total: 2,
@@ -94,7 +93,7 @@ const productoVentaEntity3 = {
 // Actuar
 
 // Asertar
-describe.skip('Para la clase ventaService', () => {
+describe('Para la clase ventaService', () => {
   describe('Para el metodo "add"', () => {
     test('Debe retonar un schema de objeto como el establecido', async () => {
       // Arreglar
@@ -102,9 +101,11 @@ describe.skip('Para la clase ventaService', () => {
       productoVentaSer.agregar.mockResolvedValueOnce({ ...productoVentaEntity })
       const objectExpected = { venta: { ...ventaExpected }, productosVenta: [{ ...productoVentaEntity }] }
       // Actuar
-      const result = await ventaService.add({ ventaIn: { ...ventaIn }, listaProductosVenta: [{ ...productoVentaEntity }] })
+      const result = await ventaService.add({ ventaIn: { ...ventaIn }, productosVenta: [{ ...productoVentaEntity }] })
       // Asertar
       expect(result).toMatchObject(objectExpected)
+
+      // expect({ hola: 1, mundo: 2 }).toMatchObject({ hola: 1 })
     })
   })
   describe('Para el metodo "addTransact"', () => {
@@ -114,7 +115,7 @@ describe.skip('Para la clase ventaService', () => {
       productoVentaSer.agregar.mockResolvedValueOnce({ ...productoVentaEntity })
       const objectExpected = { venta: { ...ventaExpected }, productosVenta: [{ ...productoVentaEntity }] }
       // Actuar
-      const result = await ventaService.addTransact({ ventaIn: { ...ventaIn }, listaProductosVenta: [{ ...productoVentaEntity }] })
+      const result = await ventaService.addTransact({ ventaIn: { ...ventaIn }, productosVenta: [{ ...productoVentaEntity }] })
       // Asertar
       expect(result).toMatchObject(objectExpected)
     })
@@ -127,7 +128,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ stock: 100 })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -135,15 +136,16 @@ describe.skip('Para la clase ventaService', () => {
       ventaAct.addProductoVenta(productoVentaEntity)
       ventaAct.addProductoVenta(productoVentaEntity2)
 
-      ventaModelo.get.mockResolvedValueOnce(ventaAct)
+      ventaModelo.get.mockResolvedValueOnce({ ...ventaAct })
 
-      const ventaExpected = { ...ventaAct }
+      const ventaExpected = { ...ventaAct, id: 2 }
       ventaExpected.costo = 15
       ventaExpected.total = 70
       ventaExpected.ganancia = 55
 
+      const ventaIn = { id: 2 }
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -153,9 +155,9 @@ describe.skip('Para la clase ventaService', () => {
       const arrayResult = [{ ...productoVentaEntity }, { ...productoVentaEntity2 }, { ...productoVentaEntity3 }]
       const prodVListIn = [{ existenciaId: 1, cantidad: 10 }, { existenciaId: 2, cantidad: 5 }, { existenciaId: 3, cantidad: 2 }]
       existenciaSer.obtener.mockResolvedValue({ stock: 100 })
-      productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
+      productoVentaSer.obtenerTodos.mockResolvedValue(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -166,13 +168,15 @@ describe.skip('Para la clase ventaService', () => {
 
       ventaModelo.get.mockResolvedValueOnce(ventaAct)
 
-      const ventaExpected = { ...ventaAct }
+      const ventaExpected = { ...ventaAct, id: 1, esCredito: false }
       ventaExpected.costo = 23
       ventaExpected.total = 80
       ventaExpected.ganancia = 57
 
+      const ventaIn = { id: 1, esCredito: false }
+
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -184,7 +188,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ ...existenciaEntity })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -196,9 +200,9 @@ describe.skip('Para la clase ventaService', () => {
       ventaExpected.costo = 1
       ventaExpected.total = 2
       ventaExpected.ganancia = 1
-
+      const ventaIn = { id: 1 }
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -211,7 +215,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ ...existenciaEntity })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -224,9 +228,9 @@ describe.skip('Para la clase ventaService', () => {
       ventaExpected.costo = productoVentaEntity.costoUnitario * 1
       ventaExpected.total = productoVentaEntity.precioUnitario * 1
       ventaExpected.ganancia = ventaExpected.total - ventaExpected.costo
-
+      const ventaIn = { id: 1 }
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -239,7 +243,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ ...existenciaEntity })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -253,8 +257,10 @@ describe.skip('Para la clase ventaService', () => {
       ventaExpected.total = productoVentaEntity.precioUnitario * 6
       ventaExpected.ganancia = ventaExpected.total - ventaExpected.costo
 
+      const ventaIn = { id: 1 }
+
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -266,7 +272,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ ...existenciaEntity })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -275,9 +281,9 @@ describe.skip('Para la clase ventaService', () => {
       ventaModelo.get.mockResolvedValueOnce(ventaAct)
 
       const ventaExpected = { ...ventaAct }
-
+      const ventaIn = { id: 1 }
       // Actuar
-      const result = await ventaService.update({ ventaId: 1, prodVListIn })
+      const result = await ventaService.update({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)
@@ -291,7 +297,7 @@ describe.skip('Para la clase ventaService', () => {
       existenciaSer.obtener.mockResolvedValue({ stock: 100 })
       productoVentaSer.obtenerTodos.mockResolvedValueOnce(arrayResult)
       productoVentaSer.actualizar.mockImplementation(async ({ prodVIn, prodVAct }) => {
-        const result = { ...productoVentaUtil, ...prodVAct, ...prodVIn }
+        const result = { ...productoVentaSchemaUtil, ...prodVAct, ...prodVIn }
         result.autoCalculo()
         return result
       })
@@ -305,9 +311,9 @@ describe.skip('Para la clase ventaService', () => {
       ventaExpected.costo = 15
       ventaExpected.total = 70
       ventaExpected.ganancia = 55
-
+      const ventaIn = { id: 1 }
       // Actuar
-      const result = await ventaService.updateTransact({ ventaId: 1, prodVListIn })
+      const result = await ventaService.updateTransact({ ventaIn, productosVenta: prodVListIn })
 
       // Asertar
       expect(result).toMatchObject(ventaExpected)

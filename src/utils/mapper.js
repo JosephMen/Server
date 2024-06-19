@@ -4,9 +4,11 @@ import usuarioSchema from '../schema/usuarioSchema.js'
 export const mapEntityToUsuario = (entity) => {
   if (entity === null) return null
   return {
-    id: entity.usuarioid,
+    id: entity.id,
     nombre: entity.nombre,
-    imagenUrl: entity.imagenurl
+    imagenUrl: entity.imagenurl,
+    password: entity.password,
+    permiso: entity.permiso
   }
 }
 export const mapEntityToProducto = (entity) => {

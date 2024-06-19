@@ -1,7 +1,6 @@
-import ventaSchema, { validarPartialVentaSchema, validarVentaSchema } from '../schema/ventaSchema.js'
+import { validarPartialVentaSchema, validarVentaSchema } from '../schema/ventaSchema.js'
 import { CONSULTA_VENTA } from '../consultas.js'
 import { BadArgumentsError, ConnectionError, RelationalDataError } from '../middlewares/error/errorClasses.js'
-import { ZodError } from 'zod'
 import dateFormat from '../utils/dateFormat.js'
 import queryBuilder from '../utils/queryBuilder.js'
 const { createInsertQuery, createUpdateQuery } = queryBuilder
@@ -31,30 +30,6 @@ export default class Venta {
     this.#cliente = cliente
     this.#logger = logger
     this.#table = 'venta'
-  }
-
-  /**
-   *
-   * @param {ZodError} error
-   * @returns {string}
-   */
-  #buildErrorMessage = (error) => {
-    const errores = error.issues.map((err) => {
-      return `${err.path.join(',')}: ${err.message}, received: ${err.received}, expected: ${err.expected}`
-    })
-    return errores.join('\n')
-  }
-
-  #buildUpdateQuery = (datos) => {
-    const entradas = Object.entries(datos)
-    if (entradas.length === 0) return ['', []]
-    const values = []
-    const sets = entradas.map(([name, value], index) => {
-      values.push(value)
-      return `${name}=$${index + 2}`
-    }).join(', ')
-    const query = ['UPDATE VENTA SET', sets, 'WHERE ID=$1'].join(' ')
-    return [query, values]
   }
 
   #parseEntity = (entidad) => {

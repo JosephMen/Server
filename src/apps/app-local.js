@@ -30,6 +30,9 @@ import Venta from '../models/venta.js'
 import VentaService from '../services/VentaService.js'
 import VentaController from '../controllers/ventaController.js'
 import createVentaRouter from '../routes/venta.js'
+import auth from '../middlewares/authJWT.js'
+import AuthenticationController from '../controllers/authController.js'
+import createAuthRouter from '../routes/auth.js'
 
 const { json, urlencoded } = pkg
 
@@ -59,6 +62,7 @@ const createApp = (cliente) => {
   const imagenController = new ImagenController({ imagenModel })
   const existenciaController = new ExistenciaController({ existenciaService })
   const ventaController = new VentaController({ ventaService })
+  const authenticationController = new AuthenticationController({ usuarioService })
 
   app.use(json())
   app.use(urlencoded({ extended: true }))
@@ -69,7 +73,9 @@ const createApp = (cliente) => {
     createParentPath: true,
     limits: { fileSize: 2 * 1024 * 1024 }
   }))
+  app.use(authenticationController.validate)
   app.use(cors())
+  app.post('/auth', createAuthRouter({ authenticationController }))
   app.use('/usuarios', createUsuariosRouter({ usuarioController }))
   app.use('/productos', createProductoRouter({ productoController }))
   app.use('/imagen', createImagenRouter({ imagenController }))

@@ -1,10 +1,6 @@
-import { BadArgumentsError } from '../middlewares/error/errorClasses.js'
-import ventaSchema from '../schema/ventaSchema.js'
-import VentaService from '../services/VentaService.js'
 import AppError from '../middlewares/error/AppError.js'
 import { messageSuccessCreator } from '../utils/messageCreator.js'
-import { validateArrayProdVInSchema, validateVentaInSchema } from '../schema/ventaInSchema.js'
-
+import VentaService from '../services/VentaService.js'
 export default class VentaController {
   #ventaService
   /**
@@ -16,59 +12,6 @@ export default class VentaController {
     this.#ventaService = ventaService
   }
 
-  validateAddBody = (req, res, next) => {
-    try {
-      const parse = ventaSchema.safeParse(req.body)
-      if (!parse.success) throw parse.error
-      const { data } = parse
-      req.data = data
-      return next()
-    } catch (e) {
-      return next(new AppError(e, 'Error con los argumentos del body para agregar nueva venta'))
-    }
-  }
-
-  validateUpdateBody = (req, res, next) => {
-    try {
-      const id = Number(parseInt(req.params.id))
-      const parse = ventaSchema.partial().safeParse(req.body)
-      if (!parse.success) throw new BadArgumentsError('Error en los argumentos del body')
-      const { data } = parse
-      req.data = data
-      req.id = id
-      return next()
-    } catch (e) {
-      return next(new AppError(e, 'Error con los argumentos del body para actualizar venta'))
-    }
-  }
-
-  validateVentaReq = (req, res, next) => {
-    try {
-      const { venta, listaProductos } = req.body
-      const dataVenta = validateVentaInSchema(venta)
-      const dataLista = validateArrayProdVInSchema(listaProductos)
-      req.body.venta = dataVenta
-      req.body.listaProductos = dataLista
-      return next()
-    } catch (e) {
-      return next(new AppError(e, 'Error con los argumentos para la creacion de venta'))
-    }
-  }
-
-  validateUpdateVentaReq = (req, res, next) => {
-    try {
-      const { listaProductos } = req.body
-      const id = Number.parseInt(req.params.id)
-      if (isNaN(id)) throw new BadArgumentsError('Id debe ser un numero')
-      const dataLista = validateArrayProdVInSchema(listaProductos)
-      req.body.listaProductos = dataLista
-      req.body.ventaId = id
-      return next()
-    } catch (e) {
-      return next(new AppError(e, 'Error con los argumentos para la actualizar venta'))
-    }
-  }
-
   /**
    *
    * @param {Request} req
@@ -76,49 +19,25 @@ export default class VentaController {
    * @param {import('express').NextFunction} next
    * @returns
    */
-  addVenta = async (req, res, next) => {
-    try {
-      const { venta: ventaIn, listaProductos: listaProductosVenta } = req.body
-      const venta = await this.#ventaService.addTransact({ listaProductosVenta, ventaIn })
-      const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
-      return res.json(message)
-    } catch (e) {
-      console.log(e)
-      return next(new AppError(e, 'Error al agregar detalles de venta'))
-    }
-  }
-
-  updateVenta = async (req, res, next) => {
-    try {
-      const { ventaId, listaProductos: prodVListIn } = req.body
-      const venta = await this.#ventaService.updateTransact({ ventaId, prodVListIn })
-      const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
-      return res.json(message)
-    } catch (e) {
-      return next(new AppError(e, 'Error al agregar detalles de venta'))
-    }
-  }
-
   add = async (req, res, next) => {
     try {
-      const { data } = req
-      await this.#ventaService.add({ data })
-      const message = messageSuccessCreator({ mensaje: 'Venta insertada exitosamente', data })
+      console.log(req.body)
+      const venta = await this.#ventaService.addTransact(req.body)
+      const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
       return res.json(message)
     } catch (e) {
-      return next(new AppError(e, 'Error al agregar nueva venta'))
+      return next(new AppError(e, 'Error al agregar detalles de venta'))
     }
   }
 
   update = async (req, res, next) => {
     try {
-      const { data, id } = req
-      if (isNaN(id)) return next()
-      await this.#ventaService.update({ id, data })
-      const message = messageSuccessCreator({ mensaje: 'Venta actualizada exitosamente', data })
+      if (req.skip) return next()
+      const venta = await this.#ventaService.updateTransact(req.body)
+      const message = messageSuccessCreator({ mensaje: 'Venta actualizada con exito', data: venta })
       return res.json(message)
     } catch (e) {
-      return next(new AppError(e, 'Error al actualizar venta'))
+      return next(new AppError(e, 'Error al agregar detalles de venta'))
     }
   }
 

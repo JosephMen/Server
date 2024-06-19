@@ -1,21 +1,43 @@
-@port=3000
+@port=3001
 POST http://localhost:{{port}}/venta
 Content-Type: application/json
 
 {
-    "descripcion": "Fecha nueva desde node 2",
-    "total": 300,
-    "ganancia": 100
+    "venta": {
+
+    },
+    "listaProductos": [
+        {"existenciaId": 1, "cantidad": 2},
+        {"existenciaId": 2, "cantidad": 2}
+    ]
 }
+
 ###
-PATCH  http://localhost:{{port}}/venta/2
+
+POST http://localhost:{{port}}/venta
 Content-Type: application/json
 
 {
-    "descripcion": "Dragon ball zeta",
-    "total": 300,
-    "ganancia": 100,
-    "esCredito": true
+    "venta": {
+        "esCredito": true
+    },
+    "listaProductos": [
+        {"existenciaId": 1, "cantidad": 2},
+        {"existenciaId": 2, "cantidad": 2}
+    ]
+}
+###
+PATCH  http://localhost:{{port}}/venta/id
+Content-Type: application/json
+
+{
+    "venta": {
+        "esCredito": true
+    },
+    "listaProductos": [
+        {"existenciaId": 1, "cantidad": 2},
+        {"existenciaId": 2, "cantidad": 2}
+    ]
 }
 
 ###

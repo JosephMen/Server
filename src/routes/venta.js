@@ -1,24 +1,20 @@
 import { Router } from 'express'
+import { validateBodyForAddVenta, validateBodyForUpdateVenta } from '../middlewares/venta/ventaMW.js'
 import VentaController from '../controllers/ventaController.js'
-import { dateFormatterCustom } from '../middlewares/dateFormatter.js'
-
 /**
  *
  * @param {{ventaController : VentaController}} param0
  */
 const createVentaRouter = ({ ventaController }) => {
-  const ventaRouter = Router()
-  const dateFormatterMid = dateFormatterCustom('fechaRealizada')
-  ventaRouter.get('/', ventaController.getAll)
-  ventaRouter.get('/:id', ventaController.get)
+  const router = Router()
+  router.get('/', ventaController.getAll)
+  router.get('/:id', ventaController.get)
 
-  ventaRouter.post('/', dateFormatterMid, ventaController.validateAddBody, ventaController.add)
-  ventaRouter.post('/detail', ventaController.validateVentaReq, ventaController.add)
+  router.post('/', validateBodyForAddVenta, ventaController.add)
 
-  ventaRouter.patch('/:id', dateFormatterMid, ventaController.validateUpdateBody, ventaController.update)
-  ventaRouter.patch('/detail/:id', ventaController.validateUpdateVentaReq, ventaController.update)
+  router.patch('/:id', validateBodyForUpdateVenta, ventaController.update)
 
-  ventaRouter.delete('/:id', ventaController.delete)
-  return ventaRouter
+  router.delete('/:id', ventaController.delete)
+  return router
 }
 export default createVentaRouter

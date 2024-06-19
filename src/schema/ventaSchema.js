@@ -42,14 +42,8 @@ export const validarPartialVentaSchema = (datos) => {
 }
 
 export const ventaSchemaUtil = {
-  id: 0,
-  fechaRealizada: '2024-1-1',
-  descripcion: '',
-  clienteId: null,
   total: 0,
   ganancia: 0,
-  esCredito: false,
-  dependienteId: null,
   costo: 0,
   /**
    *

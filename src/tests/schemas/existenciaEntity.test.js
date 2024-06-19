@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import existencia from '../../schema/existenciaEntity'
+import existencia from '../../schema/existenciaSchema'
 import dateFormat, { esBisiesto } from '../../utils/dateFormat'
 
 describe.skip('Para el schema de existenciaEntity', () => {

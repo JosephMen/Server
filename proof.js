@@ -1,8 +1,8 @@
 // this.nombre = 'eduardo'
 import express from 'express'
-import createVentaRouter from './routes/venta.js'
-import VentaController from './controllers/ventaController.js'
-import ErrorHandler from './middlewares/error/errorHandler.js'
+import createVentaRouter from './src/routes/venta.js'
+import VentaController from './src/controllers/ventaController.js'
+import ErrorHandler from './src/middlewares/error/errorHandler.js'
 import pkg from 'body-parser'
 const { json, urlencoded } = pkg
 const ventaService = {

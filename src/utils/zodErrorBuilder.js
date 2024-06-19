@@ -21,7 +21,7 @@ export default function (zodError) {
 export const arrayZodErrorBuilderMessage = (zodError) => {
   if (zodError instanceof ZodError === false) throw new Error('No es un error de tipos de zod')
   const errores = zodError.errors.map((err, index) => {
-    const template = `${++index}: Expected: ${err.expected}, received: ${err.received}
+    const template = `\n${++index}: Expected: ${err.expected}, received: ${err.received}
   position: ${err.path[0]}, object property: ${err.path[1]}\n`
     return template
   })

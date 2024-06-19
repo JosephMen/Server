@@ -10,7 +10,8 @@ const createInsertQuery = ({ table, data }) => {
   const values = []
   const keys = []
   const indexes = []
-  Object.entries(data).forEach(([key, value], index) => {
+  const { id, ...datos } = data
+  Object.entries(datos).forEach(([key, value], index) => {
     values.push(value)
     keys.push(key)
     indexes.push(`$${index + 1}`)
@@ -25,7 +26,6 @@ const createInsertQuery = ({ table, data }) => {
  * @param {String} param0.table Tabla donde se hará la actualización de datos
  * @param {Object} param0.data Objeto que contiene los campos mapeados de la tabla
  * @param {Number} param0.id id del registro especifico
- * @returns
  */
 const createUpdateQuery = ({ table, data, id }) => {
   const values = []

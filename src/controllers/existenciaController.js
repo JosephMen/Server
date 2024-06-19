@@ -1,6 +1,6 @@
 import AppError from '../middlewares/error/AppError.js'
 import { BadArgumentsError } from '../middlewares/error/errorClasses.js'
-import existencia from '../schema/existenciaEntity.js'
+import existencia from '../schema/existenciaSchema.js'
 import ExistenciaService from '../services/existenciaService.js'
 import { messageSuccessCreator } from '../utils/messageCreator.js'
 

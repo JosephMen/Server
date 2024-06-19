@@ -44,8 +44,8 @@ export default class ErrorHandler {
       })
     }
     if (errorHandled instanceof BadSchemaObjectError) {
-      return res.status(500).json({
-        message: 'Error de servidor'
+      return res.status(400).json({
+        message: 'Error con los argumentos dados'
       })
     } else {
       console.log('error encontrado:', errorHandled.errors)

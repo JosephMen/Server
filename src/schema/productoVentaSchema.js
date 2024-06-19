@@ -30,10 +30,8 @@ export const validarParcialProductoVenta = (data) => {
   }
   return parse.data
 }
-export const productoVentaUtil = {
-  existenciaId: 0,
+export const productoVentaSchemaUtil = {
   cantidad: 0,
-  ventaId: 0,
   costoUnitario: 0,
   precioUnitario: 0,
   costoTotal: 0,

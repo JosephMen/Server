@@ -1,5 +1,5 @@
 import ProductoVenta from '../models/productoVenta.js'
-import { productoVentaUtil } from '../schema/productoVentaSchema.js'
+import { productoVentaSchemaUtil } from '../schema/productoVentaSchema.js'
 
 /**
  * @typedef productoVenta
@@ -33,7 +33,7 @@ export default class ProductoVentaService {
    */
   constructor ({ productoVentaModelo }) {
     this.#productoVentaModel = productoVentaModelo
-    this.#schema = { ...productoVentaUtil }
+    this.#schema = { ...productoVentaSchemaUtil }
   }
 
   /**
@@ -82,7 +82,11 @@ export default class ProductoVentaService {
    * @param {import('pg').PoolClient} param.cliente
    */
   actualizar = async ({ prodVIn, prodVAct, cliente }) => {
-    const productoVenta = { ...this.#schema, ...prodVAct, ...prodVIn }
+    const productoVenta = {
+      ...this.#schema,
+      ...prodVAct,
+      ...prodVIn
+    }
     productoVenta.autoCalculo()
     await this.#productoVentaModel.update({ productoVenta, cliente })
     return productoVenta

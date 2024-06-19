@@ -1,9 +1,9 @@
-import { messageSuccessCreator } from '../../utils/messageCreator.js'
-import IController from '../../interfaces/controllers/IController.js'
-import { BadArgumentsError } from '../../middlewares/error/errorClasses.js'
-import AppError from '../../middlewares/error/AppError.js'
+import { messageSuccessCreator } from '../utils/messageCreator.js'
+import IController from '../interfaces/controllers/IController.js'
+import { BadArgumentsError } from '../middlewares/error/errorClasses.js'
+import AppError from '../middlewares/error/AppError.js'
 import UsuarioService from '../services/usuarioService.js'
-import { mapBodyPartialToUsuario, mapBodyToUsuario } from '../../utils/mapper.js'
+import { mapBodyPartialToUsuario, mapBodyToUsuario } from '../utils/mapper.js'
 
 export default class UsuarioController extends IController {
   /**
@@ -42,9 +42,8 @@ export default class UsuarioController extends IController {
   add = async (req, res, next) => {
     try {
       const imagen = req?.files?.imagen
-      const usuarioBody = mapBodyToUsuario(req.body)
-      if (usuarioBody === null) throw new BadArgumentsError('Error en la peticion')
-      const usuario = await this.usuarioService.add(usuarioBody, imagen)
+      const { user } = req.body
+      const usuario = await this.usuarioService.add(user, imagen)
       const message = messageSuccessCreator({
         mensaje: 'Usuario creado',
         data: usuario
