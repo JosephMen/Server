@@ -3,7 +3,6 @@ import IController from '../interfaces/controllers/IController.js'
 import { BadArgumentsError } from '../middlewares/error/errorClasses.js'
 import AppError from '../middlewares/error/AppError.js'
 import UsuarioService from '../services/usuarioService.js'
-import { mapBodyPartialToUsuario, mapBodyToUsuario } from '../utils/mapper.js'
 
 export default class UsuarioController extends IController {
   /**
@@ -16,21 +15,22 @@ export default class UsuarioController extends IController {
 
   getAll = async (req, res, next) => {
     try {
-      const offset = req?.query?.offset
+      const offset = req.query?.offset
       const param = {}
       if (offset) param.offset = offset
       const usuarios = await this.usuarioService.getAll(param)
       const messages = messageSuccessCreator({ cantidad: usuarios.length, data: usuarios })
       return res.json(messages)
     } catch (e) {
-      return next(new AppError(e, 'Error en obtener usuarios'))
+      return next(new AppError(e, 'Error al obtener usuarios'))
     }
   }
 
   get = async (req, res, next) => {
     try {
-      const usuarioId = req.params.id
-      const usuario = await this.usuarioService.getById(usuarioId)
+      const { skip, id } = req.body
+      if (skip) return next()
+      const usuario = await this.usuarioService.getById(id)
       if (usuario === null) throw new BadArgumentsError('Usuario no encontrado')
       const message = messageSuccessCreator({ data: usuario })
       return res.json(message)
@@ -55,9 +55,10 @@ export default class UsuarioController extends IController {
   }
 
   delete = async (req, res, next) => {
-    const usuarioId = req.params.id
+    const { skip, id } = req.body
+    if (skip) return next()
     try {
-      await this.usuarioService.delete(usuarioId)
+      await this.usuarioService.delete(id)
       return res.json(messageSuccessCreator({ mensaje: 'Usuario eliminado exitosamente' }))
     } catch (e) {
       return next(new AppError(e, 'Error al eliminar usuario'))
@@ -65,12 +66,11 @@ export default class UsuarioController extends IController {
   }
 
   update = async (req, res, next) => {
+    const { skip, user } = req.body
+    if (skip) return next()
+    const imagen = req.files?.imagen
     try {
-      const imagen = req?.files?.imagen
-      const usuarioBody = mapBodyPartialToUsuario(req.body)
-      if (usuarioBody === null) throw new BadArgumentsError('Error en el cuerpo de peticion')
-      usuarioBody.id = req.params.id
-      const usuarioActualizado = await this.usuarioService.update(usuarioBody, imagen)
+      const usuarioActualizado = await this.usuarioService.update(user, imagen)
       const message = messageSuccessCreator({
         mensaje: 'Usuario actualizado',
         data: usuarioActualizado

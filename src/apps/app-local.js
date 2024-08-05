@@ -30,7 +30,6 @@ import Venta from '../models/venta.js'
 import VentaService from '../services/VentaService.js'
 import VentaController from '../controllers/ventaController.js'
 import createVentaRouter from '../routes/venta.js'
-import auth from '../middlewares/authJWT.js'
 import AuthenticationController from '../controllers/authController.js'
 import createAuthRouter from '../routes/auth.js'
 

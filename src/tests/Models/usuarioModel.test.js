@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 import UsuarioModel from '../../models/usuario'
+import { BadSchemaObjectError } from '../../middlewares/error/errorClasses'
 
 const cliente = {
   query: vi.fn()
@@ -180,6 +181,20 @@ describe.skip('Para la clase de usuarioModel', () => {
 
       // Asertar
       expect(result).rejects.toThrow()
+    })
+
+    test('Cuando las entradas no son correctas arroja un error', async () => {
+      // Arreglar
+      const resultado = { rowCount: 1 }
+      cliente.query.mockResolvedValue(resultado)
+      const usuario = { ...usuarioCorrecto }
+      usuario.password = '134'
+
+      // Actuar
+      const result = async () => await usuarioModel.update(usuario)
+
+      // Asertar
+      expect(result).rejects.toThrow(BadSchemaObjectError)
     })
   })
 })

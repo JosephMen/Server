@@ -1,110 +1,217 @@
-/* eslint-disable */
-import res from '../Mocks/res.mock'
-import { vi, describe, test, expect, beforeEach } from 'vitest'
+import { vi, describe, test, expect } from 'vitest'
 import UsuarioController from '../../controllers/usuarioController'
-import { messageErrorCreator, messageSuccessCreator } from '../../utils/messageCreator'
-const imagen = {
-    name: "",
-    mimetype: "",
-    data: "",
-}
 const usuarioService = {
-    add: vi.fn(),
-    getById: vi.fn(),
-    update: vi.fn(),
-    getAll: vi.fn(),
-    delete: vi.fn()
+  add: vi.fn(),
+  getById: vi.fn(),
+  update: vi.fn(),
+  getAll: vi.fn(),
+  delete: vi.fn()
 }
-const next = () => 1
-let resMock = res
-let body = {}
-let req = {}
-const usuarioController = new UsuarioController({usuarioService})
-describe.skip("Para UsuarioController", () => {
-    beforeEach(() => {
-        req = {body: {...body}}
-        resMock = {...res}
-    })
-    test("Para el metodo getAll", async () => {
-        usuarioService.getAll.mockResolvedValueOnce([])
-        const mensajeEsperado = messageSuccessCreator({ data: [] })
-        await usuarioController.getAll(req, resMock)
-        expect(resMock.jsonResult).toEqual(mensajeEsperado)
-    })
-    test("Para el metodo get, vacio",async () => {
-        usuarioService.getById.mockResolvedValueOnce(null)
-        req.params = {id:1}
-        await expect(usuarioController.get(req, resMock, next)).resolves.toEqual(1)
-    })
-    test("Para el metodo get, con un registro",async () => {
-        usuarioService.getById.mockResolvedValueOnce(1)
-        const mensajeEsperado = messageSuccessCreator({ data: 1 })
-        req.params = {id:1}
-        await usuarioController.get(req, resMock)
-        expect(resMock.jsonResult).toEqual(mensajeEsperado)
-    })
-    test("Para el metodo add", async() => {
-        req.body.nombre = ''
-        req.files = {imagen}
-        const usuarioEsperado = {
-            id: '',
-            nombre: '',
-            imagenUrl: ''
-        }
-        usuarioService.add.mockResolvedValueOnce({
-            id: '',
-            nombre: '',
-            imagenUrl: ''
-        })
-        const mensajeEsperado = messageSuccessCreator({
-            mensaje: 'Usuario creado',
-            data: usuarioEsperado
-        })
-        await usuarioController.add(req, resMock)
-        expect(resMock.jsonResult).toEqual(mensajeEsperado)
-    })
-    test("Para add con parametros erroneos", async () => {
-        await expect(usuarioController.add(req, resMock)).rejects.toThrow()
-    })
-    test("Para delete", async () => {
-        req.params = {id:1}
-        usuarioService.delete.mockResolvedValueOnce(true)
-        const messageEsperado = messageSuccessCreator({ mensaje: 'Usuario eliminado exitosamente' })
-        await usuarioController.delete(req, resMock)
-        expect(resMock.jsonResult).toEqual(messageEsperado)
-    })
-    test("Para delete con usuario no existe", async () => {
-        const next = () => 1
-        req.params = {id:1}
-        usuarioService.delete.mockRejectedValueOnce(false)
-        await expect(usuarioController.delete(req, resMock, next)).resolves.toEqual(1)
-    })
-    test("Para el metodo updateUsuario", async() => {
-        req.body.nombre = ''
-        req.params = {id:1}
-        req.files = {imagen}
-        usuarioService.update.mockResolvedValueOnce({
-            id: '',
-            nombre: '',
-            imagenUrl: ''
-        })
-        const usuarioEsperado = {
-            id: '',
-            nombre: '',
-            imagenUrl: ''
-        }
-        const mensajeEsperado = messageSuccessCreator({
-            mensaje: 'Usuario actualizado',
-            data: usuarioEsperado
-        })
-        await usuarioController.update(req, resMock)
-        expect(resMock.jsonResult).toEqual(mensajeEsperado)
-    })
-    test("Para el metodo updateUsuario sin registro previo", async() => {
-        req.body.nombre = ''
-        req.params = {id:1}
-        usuarioService.update.mockRejectedValueOnce()
-        await expect(usuarioController.update(req, resMock, next)).resolves.toBe(1)
-    })
-})
+const next = vi.fn()
+const jsonResult = 2
+const nextResult = 1
+const resMock = {
+  json () { return jsonResult }
+}
+const reqMock = {
+  body: {}
+}
+const usuarioController = new UsuarioController({ usuarioService })
+describe.skip('Para UsuarioController', () => {
+  describe('Para el metodo "getAll"', () => {
+    test('Para una llamada normal sin query params debe ejecutarse correctamente', async () => {
+      // Arreglar
+      const res = { ...resMock }
+      const req = { ...reqMock }
+      usuarioService.getAll.mockResolvedValue([])
+      next.mockReturnValue(nextResult)
+      // Actuar
+      const result = await usuarioController.getAll(req, res, next)
 
+      // Asertar
+      expect(result).toBe(jsonResult)
+    })
+
+    test('Para una llamada normal con query params debe ejecutarse correctamente', async () => {
+      // Arreglar
+      const res = { ...resMock }
+      const req = { ...reqMock, query: { offset: 1 } }
+
+      // Actuar
+      const result = await usuarioController.getAll(req, res, next)
+
+      // Asertar
+      expect(usuarioService.getAll.mock.lastCall[0]).toEqual({ offset: 1 })
+      expect(result).toBe(jsonResult)
+    })
+
+    test('Si el servicio que conecta a la base de datos falla este se devuelve en la funcion next', async () => {
+      // Arreglar
+      const res = { ...resMock }
+      const req = { ...reqMock, query: { offset: 1 } }
+      usuarioService.getAll.mockRejectedValue()
+      // Actuar
+      const result = await usuarioController.getAll(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+  })
+  describe('Para la funcion "get"', () => {
+    test('Cuando los parametros son pasados correctamente debe volver sin errores', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { id: 1 } }
+      const res = { ...resMock }
+      usuarioService.getById.mockResolvedValue({})
+
+      // Actuar
+      const result = await usuarioController.get(req, res, next)
+
+      // Asertar
+      expect(result).toBe(jsonResult)
+    })
+
+    test('Cuando el usuario no existe debe devolver un error a la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { id: 1 } }
+      const res = { ...resMock }
+      usuarioService.getById.mockResolvedValue(null)
+
+      // Actuar
+      const result = await usuarioController.get(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+
+    test('Si la skip flag esta encendida debe llamar a la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { skip: true } }
+      const res = { ...resMock }
+      usuarioService.getById.mockResolvedValue(null)
+
+      // Actuar
+      const result = await usuarioController.get(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+      expect(next.mock.lastCall).toHaveLength(0)
+    })
+
+    test('Si el servicio que conecta a la base de datos falla este se devuelve en la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { skip: false } }
+      const res = { ...resMock }
+      usuarioService.getById.mockRejectedValue(null)
+
+      // Actuar
+      const result = await usuarioController.get(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+      expect(next.mock.lastCall).toHaveLength(1)
+    })
+  })
+  describe('Para la funcion "add"', () => {
+    test('Debe devolver todo correctamente con los parametros correctos', async () => {
+      // Arreglar
+      const user = {}
+      const req = { ...reqMock, body: { user } }
+      const res = { ...resMock }
+      usuarioService.add.mockResolvedValue(null)
+
+      // Actuar
+      const result = await usuarioController.add(req, res, next)
+
+      // Asertar
+      expect(result).toBe(jsonResult)
+    })
+
+    test('Si el servicio que guarda el registro falla debe devolver el fallo en la funcion next', async () => {
+      // Arreglar
+      const user = {}
+      const req = { ...reqMock, body: { user } }
+      const res = { ...resMock }
+      usuarioService.add.mockRejectedValue(null)
+
+      // Actuar
+      const result = await usuarioController.add(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+  })
+  describe('Para el metodo "delete"', () => {
+    test('Debe volver correctamente con la respuesta con los parametros correctos', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { id: 1, skip: false } }
+      const res = { ...resMock }
+
+      // Actuar
+      const result = await usuarioController.delete(req, res, next)
+
+      // Asertar
+      expect(result).toBe(jsonResult)
+    })
+
+    test('Si el skip flag esta encendido este se devuelve en la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { skip: true } }
+      const res = { ...resMock }
+      usuarioService.delete.mockRejectedValue()
+      // Actuar
+      const result = await usuarioController.delete(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+
+    test('Si el servicio que conecta a base de datos falla este se devuelve en la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { id: 1, skip: false } }
+      const res = { ...resMock }
+      usuarioService.delete.mockRejectedValue()
+      // Actuar
+      const result = await usuarioController.delete(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+  })
+  describe('Para la funcion "update"', () => {
+    test('Con los parametros correctos debe ejecutarse correctamente', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { user: {}, skip: false } }
+      const res = { ...resMock }
+
+      // Actuar
+      const result = await usuarioController.update(req, res, next)
+
+      // Asertar
+      expect(result).toBe(jsonResult)
+    })
+    test('Con la skip flag encendida debe devolverse en la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { skip: true } }
+      const res = { ...resMock }
+      // Actuar
+      const result = await usuarioController.update(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+
+    test('Si el servicio que conecta con base de datos falla debe volver en la funcion next', async () => {
+      // Arreglar
+      const req = { ...reqMock, body: { skip: true } }
+      const res = { ...resMock }
+      usuarioService.update.mockRejectedValue()
+
+      // Actuar
+      const result = await usuarioController.update(req, res, next)
+
+      // Asertar
+      expect(result).toBe(nextResult)
+    })
+  })
+})

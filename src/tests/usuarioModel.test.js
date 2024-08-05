@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { describe, beforeEach,expect, test, vi } from 'vitest'
 import UsuarioModel from '../models/usuario'
-import { query } from 'express'
 describe.skip('Metodos del modelo de Usuario', () => {
   const Cliente = {
     query: vi.fn()

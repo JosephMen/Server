@@ -1,54 +1,17 @@
-// this.nombre = 'eduardo'
-import express from 'express'
-import createVentaRouter from './src/routes/venta.js'
-import VentaController from './src/controllers/ventaController.js'
-import ErrorHandler from './src/middlewares/error/errorHandler.js'
-import pkg from 'body-parser'
-const { json, urlencoded } = pkg
-const ventaService = {
-  add: function ({ data }) {
-    data.id = 1
-    return data
-  },
-  update: function () {
-    return true
-  },
-  delete: function () {
-    return true
-  },
-  get: function () {
-    return {
-      id: 1,
-      nombre: 'XD'
-    }
-  },
-  getAll: function () {
-    return [{
-      id: 1,
-      nombre: 'XD'
-    },
-    {
-      id: 2,
-      nombre: 'XDD'
-    }]
-  }
-
+const method = 'POST'
+const port = 3003
+const headers = {
+  'Content-Type': 'application/json'
 }
-const errorHandler = new ErrorHandler()
-const app = express()
-const ventaController = new VentaController({ ventaService })
-
-app.use(urlencoded({ extended: true }))
-app.use(json())
-app.use('/venta', createVentaRouter({ ventaController }))
-app.use('*', (req, res, next) => {
-  return res.status(404).json({
-    message: 'Ruta no encontrada',
-    data: []
-  })
+const usuario = {
+  nombre: 'frander',
+  password: '12356+8',
+  permiso: 'administrador'
+}
+const result = await fetch(`http://localhost:${port}/usuarios`, {
+  method,
+  headers,
+  body: JSON.stringify(usuario)
 })
-app.use(errorHandler.handle)
-
-app.listen(3001, () => {
-  console.log('App de prueba en puerto http://localhost:3001')
-})
+const usuarioFetched = await result.json()
+console.log('usuarios devuelto en post: ', usuarioFetched)

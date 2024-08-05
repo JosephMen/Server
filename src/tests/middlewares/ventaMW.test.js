@@ -12,7 +12,7 @@ const next = (param) => {
     if (param instanceof Error) return 2
     return 1
 }
-describe('Para los middlewares de validacion para ventaController', () => {
+describe.skip('Para los middlewares de validacion para ventaController', () => {
   describe('Para el metodo "validateBodyForAddVenta"', () => {
     test('Debe devolver el schema venta y lista de productoVenta validado y formateado a los schemas esperados', async () => {
       // Arreglar

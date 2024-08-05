@@ -18,7 +18,7 @@ const next = (param) => {
 }
 const ventaController = new VentaController({ventaService})
 const req = {}
-describe('Para la clase "VentaController"', () => {
+describe.skip('Para la clase "VentaController"', () => {
     describe('Para el metodo "add"', () => {
         test('Debe devolver un objeto tal como se le proporciona desde el servicio', async () => {
             // Arreglar

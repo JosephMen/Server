@@ -1,0 +1,12 @@
+@port=3003
+POST http://localhost:{{port}}/usuarios
+Content-Type: application/json
+
+{
+    "nombre":"frander",
+    "password":"12345+5",
+    "permiso":"administrador"
+}
+
+###
+GET   http://localhost:{{port}}/usuarios/1

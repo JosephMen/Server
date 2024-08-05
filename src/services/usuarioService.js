@@ -1,6 +1,8 @@
 import { BadArgumentsError } from '../middlewares/error/errorClasses.js'
 import ImagenService from './imagenService.js'
 import UsuarioModel from '../models/usuario.js'
+import bcrypt from 'bcryptjs'
+import { SALT } from '../config.js'
 
 /**
 * @typedef Usuario
@@ -24,7 +26,14 @@ export default class UsuarioService {
     this.#imagenService = imagenService
   }
 
+  /**
+   *
+   * @param {Usuario} usuario
+   * @param {*} imagen
+   * @returns
+   */
   add = async (usuario, imagen) => {
+    usuario.password = bcrypt.hashSync(usuario.password, SALT)
     usuario.id = await this.#usuarioModel.add(usuario)
     if (imagen) {
       usuario.imagenUrl = await this.#imagenService.attachImageToUsuario(imagen, usuario.id)
@@ -57,7 +66,7 @@ export default class UsuarioService {
    */
   update = async (usuario, imagen) => {
     const usuarioBD = await this.#usuarioModel.getById(usuario.id)
-    if (usuarioBD === null) throw new BadArgumentsError('Usuario no encontrado')
+    if (!usuarioBD) throw new BadArgumentsError('Usuario no encontrado')
     if (imagen) usuario.imagenUrl = await this.#imagenService.attachImageToUsuario(imagen, usuario.id)
     await this.#usuarioModel.update({ ...usuarioBD, ...usuario })
     return await this.#usuarioModel.getById(usuario.id)
@@ -73,6 +82,7 @@ export default class UsuarioService {
 
   delete = async (id) => {
     const esEliminado = await this.#usuarioModel.delete(id)
+    // const imagenEliminada = await this.#imagenService.deleteImagenRelacion('usuario', )
     if (!esEliminado) throw new BadArgumentsError('No se encontro el usuario')
   }
 }

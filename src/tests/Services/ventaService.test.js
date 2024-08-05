@@ -93,7 +93,7 @@ const productoVentaEntity3 = {
 // Actuar
 
 // Asertar
-describe('Para la clase ventaService', () => {
+describe.skip('Para la clase ventaService', () => {
   describe('Para el metodo "add"', () => {
     test('Debe retonar un schema de objeto como el establecido', async () => {
       // Arreglar

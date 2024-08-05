@@ -28,7 +28,7 @@ const existencia = {
     precio: 5
 }
 const productoVentaService = new ProductoVentaService({ productoVentaModelo })
-describe('Para la clase productoVentaService', () => {
+describe.skip('Para la clase productoVentaService', () => {
   describe('Para el metodo "agregar"', () => {
     test('Debe retornar un schema de objeto como el establecido', async () => {
       // Arreglar

@@ -1,27 +1,51 @@
-import { validateUsuarioAuth } from '../../schema/usuarioSchema.js'
-import { mapBodyToUsuario } from '../../utils/mapper.js'
+import { validatePartialUsuarioToAdd, validateUsuarioToAuth, validateUsuarioToAdd } from '../../schema/usuarioSchema.js'
+import AppError from '../error/AppError.js'
 /**
  *
  * @param {Request} req
  * @param {Response} res
  * @param {import('express').NextFunction} next
  */
-export default function validateBodyForAuthUsuario (req, res, next) {
+export default async function validateBodyForAuthUsuario (req, res, next) {
   try {
-    const data = validateUsuarioAuth(req.body)
-    req.user = data
+    const data = validateUsuarioToAuth(req.body)
+    req.body.user = data
     return next()
   } catch (e) {
-    return res.status(401).json({ ok: false, message: 'user or pass not valid' })
+    return next(new AppError(e, 'Error en los parametros del body requeridos para autenticar usuario'))
   }
 }
 
-export function validateBodyForAddUsuario (req, res, next) {
+/**
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {import('express').NextFunction} next
+ * @returns
+ */
+export async function validateBodyForAddUsuario (req, res, next) {
   try {
-    const data = mapBodyToUsuario(req.body)
-    req.user = data
+    const data = validateUsuarioToAdd(req.body)
+    req.body.user = data
     return next()
   } catch (e) {
-    return res.status(401).json({ ok: false, message: 'user or pass not valid' })
+    return next(new AppError(e, 'Error en los parametros del body para agregar usuario'))
+  }
+}
+
+/**
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {import('express').NextFunction} next
+ */
+export async function validateBodyForUpdateUsuario (req, res, next) {
+  try {
+    if (req.body.skip) return next()
+    const user = validatePartialUsuarioToAdd(req.body)
+    req.body.user = user
+    return next()
+  } catch (e) {
+    return next(new AppError(e, 'Error en los parametros del body para actualizar usuario'))
   }
 }

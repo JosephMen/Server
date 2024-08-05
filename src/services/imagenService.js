@@ -74,4 +74,8 @@ export default class ImagenService extends IImagenService {
     const imagenId = idRetrieved ?? await this.imagenModel.getIdByUsuario(usuarioId)
     return `imagen/${imagenId}`
   }
+
+  deleteImagenRelacion = async (entidad, entidadId) => {
+    return await this.#imagenRelacion.deleteImagen({ entidad, entidadId })
+  }
 }

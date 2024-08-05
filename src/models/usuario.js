@@ -1,7 +1,7 @@
 import CONSULTAS_USUARIO from '../consultas.js'
 import IEntity from '../interfaces/models/IEntity.js'
 import { BadArgumentsError, ConnectionError } from '../middlewares/error/errorClasses.js'
-import { validatePartialUsuarioEntity, validateUsuarioEntity } from '../schema/usuarioSchema.js'
+import { validatePartialUsuarioToStore, validateUsuarioToStore } from '../schema/usuarioSchema.js'
 import { mapEntityToUsuario } from '../utils/mapper.js'
 import queryBuilder from '../utils/queryBuilder.js'
 const { createInsertQuery, createUpdateQuery } = queryBuilder
@@ -44,10 +44,10 @@ export default class UsuarioModel extends IEntity {
   /**
    *
    * @param {number} id
-   * @returns {Promise<Usuario>}
+   * @returns {Promise<Usuario | null>}
    */
   getById = async (id) => {
-    if (typeof id !== 'number') throw BadArgumentsError('Id debe ser un entero')
+    if (typeof id !== 'number') throw new BadArgumentsError('Id debe ser un entero')
     try {
       const result = await this.#cliente.query(CONSULTAS_USUARIO.OBTENER, [id])
       if (result.rowCount > 0) return mapEntityToUsuario(result.rows[0])
@@ -74,17 +74,18 @@ export default class UsuarioModel extends IEntity {
   }
 
   /**
-   *
+   * @param {Usuario} usuario
    * @param {Usuario} param0
-   * @returns
+   * @returns {Promise<Number>}
    */
   add = async (usuario) => {
-    const data = validateUsuarioEntity(usuario)
+    const data = validateUsuarioToStore(usuario)
     const [query, values] = createInsertQuery({ table: this.#table, data })
     try {
       const result = await this.#cliente.query(query, values)
       return result.rows[0].id
     } catch (e) {
+      console.log('Error detectado en el modelo', e)
       throw new ConnectionError(e, 'Error al insertar nuevo usuario')
     }
   }
@@ -110,15 +111,11 @@ export default class UsuarioModel extends IEntity {
    * @returns {Promise<Boolean>}
    */
   update = async (usuario) => {
-    const data = validatePartialUsuarioEntity(usuario)
+    const data = validatePartialUsuarioToStore(usuario)
     const [query, values] = createUpdateQuery({ table: this.#table, data, id: data.id })
     try {
-      const result = await this.#cliente.query(CONSULTAS_USUARIO.OBTENER, [usuario.id])
-      if (result.rowCount > 0) {
-        await this.#cliente.query(query, values)
-        return result.rowCount > 0
-      }
-      return false
+      const result = await this.#cliente.query(query, values)
+      return result.rowCount > 0
     } catch (e) {
       throw new ConnectionError(e, 'Error al actualizar usuario')
     }
