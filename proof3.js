@@ -1,8 +1,9 @@
 /* eslint-disable */
 // import 
+import z from 'zod'
 
-function funcion1({param = 2} = {param: 1}){
-    console.log(param)
-}
-
-funcion1('hello')
+const schema = z.object({
+    opcional: z.string().default('hola mundo')
+})
+const objeto = schema.partial().safeParse({})
+console.log(objeto.data)

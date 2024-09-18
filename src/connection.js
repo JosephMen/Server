@@ -3,11 +3,7 @@ import pkg from 'pg'
 const { Pool } = pkg
 dotenv.config()
 
-const USER = process.env.USER
-const PASSWORD = process.env.PASSWORD
-const DATABASE = process.env.DATABASE
-const HOST = process.env.HOST
-const PORT = process.env.PORT
+const { USER, PASSWORD, DATABASE, HOST, PORT } = process.env
 
 const Cliente = new Pool({
   user: USER,
@@ -16,4 +12,13 @@ const Cliente = new Pool({
   host: HOST,
   port: PORT
 })
+
+export const loggedQuery = (query, values) => {
+  console.log('Query: ', query)
+  console.log('Values: ', values)
+  return Cliente.query(query, values)
+}
+export const getClient = () => {
+  return Cliente.connect()
+}
 export default Cliente

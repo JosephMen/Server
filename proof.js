@@ -1,17 +1,10 @@
-const method = 'POST'
-const port = 3003
-const headers = {
-  'Content-Type': 'application/json'
-}
-const usuario = {
-  nombre: 'frander',
-  password: '12356+8',
-  permiso: 'administrador'
-}
-const result = await fetch(`http://localhost:${port}/usuarios`, {
-  method,
-  headers,
-  body: JSON.stringify(usuario)
-})
-const usuarioFetched = await result.json()
-console.log('usuarios devuelto en post: ', usuarioFetched)
+const lista = [
+  1800, 600, 1100, 550, 4000, 2200, 900, 700, 800, 2200, 1800, 500, 1300, 600, 900, 800,
+  1400, 2400, 1000, 1000, 1450, 1300, 1600, 550, 1150, 900, 1500, 800, 800, 500, 1650, 300, 2300,
+  500, 450, 2600, 2800, 1800, 1700, 1650, 600, 3400, 1800, 1200, 1900, 300, 1350, 700, 900, 1500,
+  1800, 1400, 1200, 600, 1800, 1650, 500, 1800, 600, 2600, 2200, 1350, 3400, 500, 1000, 850, 350
+]
+const total = lista.reduce((prev, current) => {
+  return prev + current
+}, 0)
+console.log('Total: ', total)

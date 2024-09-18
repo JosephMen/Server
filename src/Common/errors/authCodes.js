@@ -1,0 +1,7 @@
+export default Object.freeze({
+  USER_PASS_NOT_VALID: 400,
+  TOKEN_NOT_VALID: 400,
+  NOT_AUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_VALID: 400
+})

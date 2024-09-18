@@ -1,1 +1,4 @@
-export const { SALT = 10 } = process.env
+export const {
+  SALT = 10,
+  LLAVE_SECRETA
+} = process.env
