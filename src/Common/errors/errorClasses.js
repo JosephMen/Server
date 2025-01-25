@@ -91,3 +91,10 @@ export class BadRequestError extends Error {
     this.name = errorTypes.BadRequestError
   }
 }
+
+export class NotImplementedError extends Error {
+  constructor (message) {
+    super(message)
+    this.name = errorTypes.NotImplementedError
+  }
+}

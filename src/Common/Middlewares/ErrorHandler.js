@@ -1,5 +1,6 @@
+import IErrorHandler from '../../Interfaces/IError/IErrorHandler.js'
 import UnexpectedError, { ConnectionError, BadArgumentsError, ServerError, RelationalDataError, BadSchemaObjectError, AuthorizationError, BadRequestError, BadArgumentsFromClientError } from '../errors/errorClasses.js'
-export default class ErrorHandler {
+export default class ErrorHandler extends IErrorHandler {
   /**
    *
    * @param {import('../errors/AppError.js').default} appError
@@ -8,8 +9,8 @@ export default class ErrorHandler {
    * @param {import('express').NextFunction} next
    * @returns
    */
-  handle = (appError, req, res, next) => {
-    console.log('Error detectado: ', appError.message)
+  handle (appError, req, res, next) {
+    console.log('\nError detectado: ', appError.message)
 
     const { errorHandled } = appError
     console.log('Nombre: ', errorHandled.name)
@@ -74,10 +75,13 @@ export default class ErrorHandler {
       })
     } else {
       console.log('error encontrado:', errorHandled.errors)
+      console.log(appError)
       return res.status(500).json({
         message: 'Error',
         data: []
       })
     }
   }
+
+  getHandler = () => this.handle
 }

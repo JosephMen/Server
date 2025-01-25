@@ -3,6 +3,7 @@ export const mapEntityToUsuario = (entity) => {
   if (entity === null) return null
   return {
     id: entity.id,
+    username: entity.username,
     nombre: entity.nombre,
     imagenUrl: entity.imagenurl,
     password: entity.password ?? '',
@@ -28,6 +29,7 @@ export const mapBodyPartialToUsuario = (body) => {
 export function mapEntityUsuarioToShow (usuario) {
   return {
     nombre: usuario.nombre,
+    username: usuario.username,
     id: usuario.id,
     imagenUrl: usuario.imagenUrl,
     permiso: usuario.permiso

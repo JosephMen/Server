@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "start": "nodemon index.js",
-    "proof": "nodemon proof2.js"
+    "proof": "nodemon ./src/apps/postgres/EP1.js"
   },
   "author": "Frander Joseph Mena",
   "license": "ISC",

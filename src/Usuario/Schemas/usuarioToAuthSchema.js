@@ -3,7 +3,7 @@ import zodErrorBuilder from '../../Common/utils/zodErrorBuilder.js'
 import { BadSchemaObjectError } from '../../Common/errors/errorClasses.js'
 
 const usuarioToAuthSchema = z.object({
-  nombre: z.string().min(5).max(25),
+  username: z.string().min(5).max(25),
   password: z.string().min(5).max(25)
 })
 

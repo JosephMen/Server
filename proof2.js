@@ -11,7 +11,7 @@ import ImagenService from './src/Imagen/Services/imagenService.js'
 import AuthController from './src/Authorization/Controller/authController.js'
 import createAuthRouter from './src/Authorization/Routes/auth.js'
 
-import cliente from './src/connection.js'
+import {clientWrapper as cliente} from './src/connection.js'
 
 import ErrorHandler from './src/Common/Middlewares/ErrorHandler.js'
 import bodyParser from 'body-parser'

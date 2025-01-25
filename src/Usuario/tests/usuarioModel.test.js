@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import UsuarioModel from '../Model/usuario'
 import { BadSchemaObjectError } from '../../Common/errors/errorClasses'
-
+import permisos from '../utils/permissions'
 const cliente = {
   query: vi.fn()
 }
@@ -9,7 +9,7 @@ const usuarioExtraido = {
   id: 1,
   nombre: 'frander',
   password: '123456',
-  permiso: 'Administrador',
+  permiso: permisos.ADMIN,
   imagenurl: 'img/img'
 }
 
@@ -17,14 +17,15 @@ const usuarioFormateado = {
   id: 1,
   nombre: 'frander',
   password: '123456',
-  permiso: 'Administrador',
+  permiso: permisos.ADMIN,
   imagenUrl: 'img/img'
 }
 const usuarioCorrecto = {
   id: 1,
   nombre: 'frander',
+  username: 'frander',
   password: '123456',
-  permiso: 'Administrador',
+  permiso: permisos.ADMIN,
   imagenUrl: 'img/img'
 }
 const usuarioModel = new UsuarioModel({ cliente })
@@ -69,14 +70,14 @@ describe.skip('Para la clase de usuarioModel', () => {
     })
   })
 
-  describe('Para el metodo "getByName"', () => {
+  describe('Para el metodo "getByUserName"', () => {
     test('Debe devolver un usuario formateado', async () => {
       // Arreglar
       const devolucion = { rowCount: 1, rows: [usuarioExtraido] }
 
       cliente.query.mockResolvedValue(devolucion)
       // Actuar
-      const result = await usuarioModel.getByName('nani')
+      const result = await usuarioModel.getByUserName('nani')
       // Asertar
       expect(result).toEqual(usuarioFormateado)
     })

@@ -1,16 +1,17 @@
 import { describe, expect, test } from 'vitest'
-import { validateUsuarioAuth, validateUsuarioEntity } from '../Schemas/usuarioSchema'
-describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
-  describe('Para "validateUsuarioAuth"', () => {
+import { validateUsuarioToStore } from '../Schemas/usuarioToStoreSchema'
+import { validateUsuarioToAuth } from '../Schemas/usuarioToAuthSchema'
+describe('Para las funciones dentro de usuarioSchema.js', () => {
+  describe('Para "validateUsuarioToAuth"', () => {
     test('Debe devolver el mismo schema de objeto dado que es correcto', () => {
       // Arreglar
       const objeto = {
-        nombre: 'frander',
+        username: 'frander',
         password: '123456'
       }
 
       // Actuar
-      const result = validateUsuarioAuth(objeto)
+      const result = validateUsuarioToAuth(objeto)
 
       // Asertar
       expect(result).toEqual(objeto)
@@ -24,7 +25,7 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioAuth(objeto)
+      const funcion = () => validateUsuarioToAuth(objeto)
 
       // Asertar
       expect(funcion).toThrow()
@@ -38,7 +39,7 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioAuth(objeto)
+      const funcion = () => validateUsuarioToAuth(objeto)
 
       // Asertar
       expect(funcion).toThrow()
@@ -50,7 +51,7 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioAuth(objeto)
+      const funcion = () => validateUsuarioToAuth(objeto)
 
       // Asertar
       expect(funcion).toThrow()
@@ -61,24 +62,25 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioAuth(objeto)
+      const funcion = () => validateUsuarioToAuth(objeto)
 
       // Asertar
       expect(funcion).toThrow()
     })
   })
-  describe('Para "validateUsuarioEntity"', () => {
+  describe('Para "validateUsuarioToStore"', () => {
     const objetoCorrecto = {
       nombre: 'frander',
+      username: 'frander',
       password: '123456',
-      permiso: 'Administrador'
+      permiso: 'administrador'
     }
     test('Debe devolver el mismo schema de objeto dado que es correcto', () => {
       // Arreglar
       const objeto = { ...objetoCorrecto }
 
       // Actuar
-      const result = validateUsuarioEntity(objeto)
+      const result = validateUsuarioToStore(objeto)
 
       // Asertar
       expect(result).toEqual(objetoCorrecto)
@@ -92,7 +94,7 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioEntity(objeto)
+      const funcion = () => validateUsuarioToStore(objeto)
 
       // Asertar
       expect(funcion).toThrow()
@@ -106,7 +108,7 @@ describe.skip('Para las funciones dentro de usuarioSchema.js', () => {
       }
 
       // Actuar
-      const funcion = () => validateUsuarioEntity(objeto)
+      const funcion = () => validateUsuarioToStore(objeto)
 
       // Asertar
       expect(funcion).toThrow()

@@ -1,5 +1,5 @@
 import { vi, describe, test, expect } from 'vitest'
-import validateBodyForAuthUsuario, { validateBodyForAddUsuario, validateBodyForUpdateUsuario } from '../Middlewares/usuarioMW'
+import MwValidateBodyForAuthUsuario, { MwValidateBodyForAddUsuario, MwValidateBodyForUpdateUsuario } from '../Middlewares/usuarioMW'
 import { BadSchemaObjectError } from '../../Common/errors/errorClasses'
 
 const resMock = {
@@ -10,19 +10,19 @@ const reqMock = {
 }
 const next = vi.fn()
 describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
-  describe('Para "validateBodyForAuthUsuario"', () => {
+  describe('Para "MwValidateBodyForAuthUsuario"', () => {
     test('Debe devolver en el body del req los mismos datos que se envian', async () => {
       // Arreglar
-      const nombre = 'frander'
+      const username = 'frander'
       const password = 'abcedeof'
-      const req = { ...reqMock, body: { nombre, password } }
+      const req = { ...reqMock, body: { username, password } }
       const res = { ...resMock }
       next.mockReturnValue(1)
 
       // Actuar
-      await validateBodyForAuthUsuario(req, res, next)
+      await MwValidateBodyForAuthUsuario(req, res, next)
       // Asertar
-      expect(req.body.user.nombre).toBe(nombre)
+      expect(req.body.user.username).toBe(username)
       expect(req.body.user.password).toBe(password)
     })
 
@@ -33,7 +33,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAuthUsuario(req, res, next)
+      await MwValidateBodyForAuthUsuario(req, res, next)
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
       expect(next.mock.lastCall[0].errorHandled).toBeInstanceOf(BadSchemaObjectError)
@@ -47,7 +47,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAuthUsuario(req, res, next)
+      await MwValidateBodyForAuthUsuario(req, res, next)
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
       expect(next.mock.lastCall[0].errorHandled).toBeInstanceOf(BadSchemaObjectError)
@@ -61,7 +61,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAuthUsuario(req, res, next)
+      await MwValidateBodyForAuthUsuario(req, res, next)
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
       expect(next.mock.lastCall[0].errorHandled).toBeInstanceOf(BadSchemaObjectError)
@@ -75,29 +75,31 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAuthUsuario(req, res, next)
+      await MwValidateBodyForAuthUsuario(req, res, next)
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
       expect(next.mock.lastCall[0].errorHandled).toBeInstanceOf(BadSchemaObjectError)
     })
   })
 
-  describe('Para"validateBodyForAddUsuario"', () => {
+  describe('Para "validateBodyForAddUsuario"', () => {
     test('Debe devolver los mismos valores que se le pasan desde el body', async () => {
       // Arreglar
       const nombre = 'frander'
       const password = 'abcedafd'
-      const permiso = 'admin'
-      const req = { ...reqMock, body: { nombre, password, permiso } }
+      const permiso = 'administrador'
+      const username = 'frander'
+      const req = { ...reqMock, body: { nombre, password, permiso, username } }
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAddUsuario(req, res, next)
+      await MwValidateBodyForAddUsuario(req, res, next)
 
       // Asertar
       expect(req.body.user.nombre).toBe(nombre)
       expect(req.body.user.password).toBe(password)
       expect(req.body.user.permiso).toBe(permiso)
+      expect(req.body.user.username).toBe(username)
     })
 
     test('Debe devolver un error a la funcion next pues "password" no cumple con los requisitos', async () => {
@@ -109,7 +111,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAddUsuario(req, res, next)
+      await MwValidateBodyForAddUsuario(req, res, next)
 
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
@@ -124,7 +126,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForAddUsuario(req, res, next)
+      await MwValidateBodyForAddUsuario(req, res, next)
 
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
@@ -137,30 +139,28 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       const id = 1
       const nombre = 'frander'
       const password = 'abcedafd'
-      const permiso = 'admin'
-      const req = { ...reqMock, body: { id, nombre, password, permiso } }
+      const permiso = 'administrador'
+      const username = 'username'
+      const req = { ...reqMock, body: { id, nombre, username, password, permiso } }
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForUpdateUsuario(req, res, next)
+      await MwValidateBodyForUpdateUsuario(req, res, next)
 
       // Asertar
-      expect(req.body.user.id).toBe(id)
-      expect(req.body.user.nombre).toBe(nombre)
-      expect(req.body.user.password).toBe(password)
-      expect(req.body.user.permiso).toBe(permiso)
+      expect(req.body.user).toEqual({ nombre, permiso, id, username })
     })
 
     test('Debe devolver un error en next pues "nombre" no cumple con las reglas ', async () => {
       // Arreglar
       const nombre = 'fra'
       const password = 'abcedafd'
-      const permiso = 'admin'
+      const permiso = 'administrador'
       const req = { ...reqMock, body: { nombre, password, permiso } }
       const res = { ...resMock }
 
       // Actuar
-      await validateBodyForUpdateUsuario(req, res, next)
+      await MwValidateBodyForUpdateUsuario(req, res, next)
 
       // Asertar
       expect(next.mock.lastCall).toHaveLength(1)
@@ -175,7 +175,7 @@ describe.skip('Para las validaciones en el middleware de usuarioMW.js', () => {
       next.mockReturnValue(1)
 
       // Actuar
-      const result = await validateBodyForUpdateUsuario(req, res, next)
+      const result = await MwValidateBodyForUpdateUsuario(req, res, next)
 
       // Asertar
       expect(result).toBe(1)

@@ -8,6 +8,7 @@ const { createInsertQuery, createUpdateQuery } = queryBuilder
  * @typedef Usuario
  * @property {Number | undefined} id the Id
  * @property {string} nombre Nombre
+ * @property {string} username Nombre de usuario unico
  * @property {string | undefined} imagenUrl la direccion de la imagen
  * @property {string} password la direccion de la imagen
  * @property {string} permiso la direccion de la imagen
@@ -15,14 +16,16 @@ const { createInsertQuery, createUpdateQuery } = queryBuilder
 export default class UsuarioModel {
   #table
   #cliente
+  #recordsPerPage
   /**
    *
    * @param {Object} param0
-   * @param {import('pg').PoolClient} param0.cliente
+   * @param {import('pg').Pool} param0.cliente
    */
   constructor ({ cliente }) {
     this.#cliente = cliente
     this.#table = 'usuarios'
+    this.#recordsPerPage = 10
   }
 
   /**
@@ -35,8 +38,9 @@ export default class UsuarioModel {
    *
    * @returns {Promise<Array<Usuario>>}
    */
-  getAll = async ({ offset = 0 } = { offset: 0 }) => {
+  getAll = async ({ page = 0 } = { page: 0 }) => {
     try {
+      const offset = page * this.#recordsPerPage
       const result = await this.#cliente.query(CONSULTAS_USUARIO.OBTENER_TODOS, [offset])
       if (result.rowCount === 0) return []
       return result.rows.map(us => mapEntityToUsuario(us))
@@ -67,7 +71,7 @@ export default class UsuarioModel {
    * @param {string} name
    * @param {import('pg').PoolClient}
    */
-  getByName = async (name, clienteForTransact) => {
+  getByUserName = async (name, clienteForTransact) => {
     const cliente = clienteForTransact ?? this.#cliente
     if (typeof name !== 'string') throw new BadArgumentsError('name debe ser una cadena no vacia')
     if (name.trim().length === 0) throw new BadArgumentsError('name no puede ser una cadena solo compuesta de espacios')
@@ -131,6 +135,18 @@ export default class UsuarioModel {
       return result.rowCount > 0
     } catch (e) {
       throw new ConnectionError(e, 'Error al actualizar usuario')
+    }
+  }
+
+  /**
+   * @return {Promise<Number>}
+   */
+  countAll = async () => {
+    try {
+      const result = await this.#cliente.query(CONSULTAS_USUARIO.CONTAR_TODOS)
+      return result.rows[0].total
+    } catch (e) {
+      throw new ConnectionError(e, 'Error al contar la cantidad total de usuarios')
     }
   }
 }

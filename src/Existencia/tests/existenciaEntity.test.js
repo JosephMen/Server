@@ -1,12 +1,13 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import existencia from '../Schemas/existenciaSchema'
 import dateFormat, { esBisiesto } from '../../Common/utils/dateFormat'
 
 describe.skip('Para el schema de existenciaEntity', () => {
   test('debe devolver verdadero y el schema con todos sus datos', () => {
     // Arreglar
+    const nowDate = new Date().toLocaleDateString('es-MX')
     const objeto = {
-      productoid: 1,
+      productoId: 1,
       stock: 1,
       precio: 1,
       costo: 1
@@ -14,10 +15,9 @@ describe.skip('Para el schema de existenciaEntity', () => {
     // Actuar
     const resultado = existencia.safeParse(objeto)
     // Asertar
-    console.log(resultado.data)
     expect(resultado.success).toBe(true)
     if (resultado.success) {
-      expect(resultado.data.fechaentrada).toBe('18/4/2024')
+      expect(resultado.data.fechaEntrada).toBe(nowDate)
     }
   })
 })

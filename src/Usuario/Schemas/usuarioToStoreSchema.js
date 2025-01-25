@@ -6,7 +6,8 @@ import validatePermission from '../utils/validatePermission.js'
 
 const usuarioToStoreSchema = z.object({
   id: z.number().optional(),
-  nombre: z.string().min(5).max(25),
+  nombre: z.string().min(5).max(30).optional(),
+  username: z.string().min(5).max(30),
   password: z.string().min(5),
   permiso: z.string().min(5).max(25).default(PERMISOS.GUESS),
   imagenUrl: z.string().optional().nullish()

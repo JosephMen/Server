@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import pkg from 'pg'
+
 const { Pool } = pkg
 dotenv.config()
 
@@ -13,12 +14,29 @@ const Cliente = new Pool({
   port: PORT
 })
 
-export const loggedQuery = (query, values) => {
-  console.log('Query: ', query)
-  console.log('Values: ', values)
-  return Cliente.query(query, values)
+/**
+ *
+ * @param {typeof Cliente | import('pg').PoolClient} cliente
+ * @returns
+ */
+const wrapCliente = (cliente) => {
+  return {
+    query: function (query, args) {
+      this.logger('\nquery: ', query)
+      this.logger('argumentos: ', args ?? 'No hay argumentos')
+      return cliente.query(query, args)
+    },
+    async connect () {
+      this.logger('\nSe ha inicializado un cliente para transacción')
+      return wrapCliente(await cliente.connect())
+    },
+    release () {
+      this.logger('\nSe ha liberado el cliente de la transacción\n')
+      cliente.release()
+    },
+    logger: console.log
+  }
 }
-export const getClient = () => {
-  return Cliente.connect()
-}
+export const clientWrapped = wrapCliente(Cliente)
+
 export default Cliente

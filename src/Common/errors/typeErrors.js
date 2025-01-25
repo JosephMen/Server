@@ -11,6 +11,7 @@ const errorTypes = Object.freeze({
   RelationalDataError: 'Relational Data Error',
   SchemaObject: 'Schema Object Error',
   AuthorizationError: 'Authorization Error',
-  BadRequestError: 'Bad Request Error'
+  BadRequestError: 'Bad Request Error',
+  NotImplementedError: 'Not implemented Class method Error'
 })
 export default errorTypes

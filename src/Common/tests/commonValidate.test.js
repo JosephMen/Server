@@ -1,5 +1,5 @@
 import { vi, describe, test, expect } from 'vitest'
-import { validateNumericId } from '../Middlewares/commonValidate'
+import { MwValidateNumericId as validateNumericId } from '../Middlewares/commonValidate'
 describe.skip('Para las validaciones del modulo "commonValidate"', () => {
   const reqMock = {
     body: {},

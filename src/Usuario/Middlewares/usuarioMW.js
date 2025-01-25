@@ -1,7 +1,7 @@
 import { validatePartialUsuarioToAdd, validateUsuarioToAdd } from '../Schemas/usuarioToAddSchema.js'
 import { validateUsuarioToAuth } from '../Schemas/usuarioToAuthSchema.js'
 import AppError from '../../Common/errors/AppError.js'
-import { BadArgumentsError, BadArgumentsFromClientError, BadRequestError } from '../../Common/errors/errorClasses.js'
+import { BadArgumentsFromClientError } from '../../Common/errors/errorClasses.js'
 import { validateNewPasswordSchema } from '../Schemas/newPasswordSchema.js'
 /**
  *
@@ -9,7 +9,7 @@ import { validateNewPasswordSchema } from '../Schemas/newPasswordSchema.js'
  * @param {Response} res
  * @param {import('express').NextFunction} next
  */
-export default async function validateBodyForAuthUsuarioMw (req, res, next) {
+export default async function MwValidateBodyForAuthUsuarioMw (req, res, next) {
   try {
     const data = validateUsuarioToAuth(req.body)
     req.body.user = data
@@ -71,7 +71,7 @@ export function MwValidateNewPassword (req, res, next) {
         `Se encontro: prevPassword: ${prevPassword} y newPassword: ${newPassword}`)
     }
     const data = validateNewPasswordSchema({ prevPassword, newPassword, id: req.body.id })
-    req.body.pass = data
+    req.body.passwordData = data
     return next()
   } catch (e) {
     return next(new AppError(e, 'Error al validar argumentos para cambiar contraseña'))

@@ -1,18 +1,21 @@
 import { vi, describe, test, expect } from 'vitest'
 import UsuarioService from '../Services/usuarioService'
-import { BadArgumentsError } from '../../Common/errors/errorClasses'
+import { BadArgumentsError, BadRequestError } from '../../Common/errors/errorClasses'
 
 const usuarioModel = {
   add: vi.fn(),
   update: vi.fn(),
   getById: vi.fn(),
-  delete: vi.fn()
+  delete: vi.fn(),
+  getClientForTransact: vi.fn(),
+  getByUserName: vi.fn()
 }
 const imagenService = {
-  attachImageToUsuario: vi.fn()
+  attachImageToUsuario: vi.fn(),
+  deleteImageFromUsuario: vi.fn()
 }
 const usuarioService = new UsuarioService(usuarioModel, imagenService)
-describe.skip('Para la clase "usuarioService"', () => {
+describe('Para la clase "usuarioService"', () => {
   describe('Para el metodo "add"', () => {
     test('Debe ejecutarse correctamente con los parametros correctos', async () => {
       // Arreglar
@@ -20,6 +23,8 @@ describe.skip('Para la clase "usuarioService"', () => {
       const imagen = {}
       usuarioModel.add.mockResolvedValue(1)
       usuarioModel.getById.mockResolvedValue(usuario)
+      usuarioModel.getClientForTransact.mockReturnValue({ query: vi.fn(), release: vi.fn() })
+      usuarioModel.getByUserName.mockResolvedValue(null)
       imagenService.attachImageToUsuario.mockResolvedValue('imagen/user1.jpg')
 
       // Actuar
@@ -76,7 +81,7 @@ describe.skip('Para la clase "usuarioService"', () => {
       // Actuar
       const func = async () => await usuarioService.update(usuario, imagen)
       // Asertar
-      expect(func).rejects.toThrow(BadArgumentsError)
+      expect(func).rejects.toThrow(BadRequestError)
     })
   })
   describe('Para el metodo "delete"', () => {
@@ -84,7 +89,8 @@ describe.skip('Para la clase "usuarioService"', () => {
       // Arreglar
       const id = 1
       usuarioModel.delete.mockResolvedValue(true)
-
+      usuarioModel.getById.mockResolvedValue(1)
+      imagenService.deleteImageFromUsuario.mockResolvedValue(true)
       // Actuar
       const func = async () => await usuarioService.delete(id)
 
@@ -92,7 +98,7 @@ describe.skip('Para la clase "usuarioService"', () => {
       expect(func()).resolves.not.Throw()
     })
 
-    test('Cuando el modelo de conexion a base de datos no elimina', async () => {
+    test('Cuando el modelo de conexion a base de datos no elimina, retorna false', async () => {
       // Arreglar
       const id = 1
       usuarioModel.delete.mockResolvedValue(false)
@@ -101,7 +107,7 @@ describe.skip('Para la clase "usuarioService"', () => {
       const func = async () => await usuarioService.delete(id)
 
       // Asertar
-      expect(func()).rejects.to.Throw()
+      expect(await func()).toBe(false)
     })
 
     test('Cuando el modelo de conexion a base de datos erra', async () => {

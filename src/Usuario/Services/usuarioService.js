@@ -53,13 +53,14 @@ export default class UsuarioService {
    * @returns
    */
   #add = async ({ usuario, imagen, clientForTransact }) => {
-    const usuarioPrev = await this.#usuarioModel.getByName(usuario.nombre)
+    const usuarioPrev = await this.#usuarioModel.getByUserName(usuario.nombre)
     if (usuarioPrev) throw new BadRequestError('Ya existe un usuario con ese nombre')
     usuario.password = bcrypt.hashSync(usuario.password, SALT)
     usuario.id = await this.#usuarioModel.add(usuario, clientForTransact)
     if (imagen) {
       usuario.imagenUrl = await this.#imagenService.attachImageToUsuario({ imagen, id: usuario.id, clientForTransact })
-      await this.#usuarioModel.update(usuario, clientForTransact)
+      const { id, imagenUrl } = usuario
+      await this.#usuarioModel.update({ id, imagenUrl }, clientForTransact)
     }
     return usuario
   }
@@ -102,18 +103,18 @@ export default class UsuarioService {
 
   /**
    *
-   * @param {String} nombre
+   * @param {String} username
    */
-  getByName = async (nombre) => {
-    return await this.#usuarioModel.getByName(nombre)
+  getByUsername = async (username) => {
+    return await this.#usuarioModel.getByUserName(username)
   }
 
   /**
    *
    * @returns {Promise<Array<Usuario>>}
    */
-  getAll = async ({ offset = 0 } = { offset: 0 }) => {
-    return await this.#usuarioModel.getAll({ offset })
+  getAll = async ({ page = 0 } = { page: 0 }) => {
+    return await this.#usuarioModel.getAll({ page })
   }
 
   /**
@@ -133,15 +134,19 @@ export default class UsuarioService {
 
   /**
    *
-   * @param {object} pass
-   * @param {string} pass.prevPassword
-   * @param {string} pass.newPassword
+   * @param {object} passwordData
+   * @param {string} passwordData.prevPassword
+   * @param {string} passwordData.newPassword
    */
-  changePassword = async (pass) => {
-    const usuario = await this.#usuarioModel.getById(pass.id)
-    const isTheSame = bcrypt.compare(pass.prevPassword, usuario.password)
+  changePassword = async (passwordData) => {
+    const userFromDB = await this.#usuarioModel.getById(passwordData.id)
+    const isTheSame = await bcrypt.compare(passwordData.prevPassword, userFromDB.password)
     if (!isTheSame) throw new BadRequestError('La contraseña no es correcta')
-    const hashedPass = bcrypt.hashSync(pass.newPassword, SALT)
-    return await this.#usuarioModel.update({ password: hashedPass, id: pass.id })
+    const hashedPass = bcrypt.hashSync(passwordData.newPassword, SALT)
+    return await this.#usuarioModel.update({ password: hashedPass, id: passwordData.id })
+  }
+
+  countAll = async () => {
+    return await this.#usuarioModel.countAll()
   }
 }

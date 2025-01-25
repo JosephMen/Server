@@ -30,9 +30,16 @@ export default class UsuarioController {
    */
   getAll = async (req, res, next) => {
     try {
-      const offset = req.query?.offset
-      const usuarios = (await this.#usuarioService.getAll({ offset })).map(us => mapEntityUsuarioToShow(us))
-      const messages = messageSuccessCreator({ cantidad: usuarios.length, data: usuarios })
+      const page = req.query?.page ?? 0
+      const usuarios = (await this.#usuarioService.getAll({ page })).map(us => mapEntityUsuarioToShow(us))
+      const registrosTotales = await this.#usuarioService.countAll()
+      const messages = messageSuccessCreator({
+        registrosTraidos: usuarios.length,
+        registrosTotales,
+        registrosPorPagina: 10,
+        numeroDePagina: page,
+        data: usuarios
+      })
       return res.json(messages)
     } catch (e) {
       return next(new AppError(e, 'Error al obtener usuarios'))
@@ -97,10 +104,10 @@ export default class UsuarioController {
    */
   changePassword = async (req, res, next) => {
     if (req.body.skip) return next()
-    const { pass, userAuth } = req.body
+    const { passwordData, userAuth } = req.body
     try {
-      this.#validatePasswordChangePermission(pass.id, userAuth)
-      const isChanged = await this.#usuarioService.changePassword(pass)
+      this.#validatePasswordChangePermission(passwordData.id, userAuth)
+      const isChanged = await this.#usuarioService.changePassword(passwordData)
       if (isChanged) return res.json(messageSuccessCreator({ mensaje: 'Contraseña cambiada' }))
       return res
         .status(INVALID_AUTH_CODES.USER_PASS_NOT_VALID)
@@ -146,6 +153,7 @@ export default class UsuarioController {
    * @param {number} idToDelete
    */
   #validatePermisionForDelete = async (userWhoDeletes, idToDelete) => {
+    if (userWhoDeletes.id === idToDelete) return
     if (userWhoDeletes.id !== idToDelete && userWhoDeletes.permiso !== PERMISOS.ADMIN) throw new AuthorizationError('No puedes modificar o eliminar otro usuario')
     const userToDelete = await this.#usuarioService.getById(idToDelete)
     if (userWhoDeletes.permiso === userToDelete.permiso) throw new AuthorizationError('No puedes borrar a otro usuario con el mismo permiso')
@@ -163,7 +171,7 @@ export default class UsuarioController {
     if (skip) return next()
     const imagen = req.files?.imagen
     try {
-      this.#validatePermissionForUpdate(userAuth, user)
+      await this.#validatePermissionForUpdate(userAuth, user)
       const usuarioActualizado = mapEntityUsuarioToShow(await this.#usuarioService.update(user, imagen))
       const message = messageSuccessCreator({
         mensaje: 'Usuario actualizado',
@@ -178,11 +186,12 @@ export default class UsuarioController {
   /**
    *
    * @param {userAuth} userAuth usuario extraido del token credencial
-   * @param {object} user objeto usuario con las propiedades a ser actualizadas
+   * @param {object} userToUpdate objeto usuario con las propiedades a ser actualizadas
    */
-  #validatePermissionForUpdate = (userAuth, user) => {
+  #validatePermissionForUpdate = async (userAuth, userToUpdate) => {
+    if (userToUpdate.permiso === userAuth.permiso && userToUpdate.id !== userAuth.id) throw new AuthorizationError('No puedes modificar otro usuario con tu mismo permiso')
     if (userAuth.permiso === PERMISOS.GUESS) throw new AuthorizationError('No posee privilegios para actualizar usuario')
-    if (userAuth.id !== user.id && userAuth.permiso !== PERMISOS.ADMIN) throw new AuthorizationError('No puedes modificar un usuario diferente al tuyo', INVALID_AUTH_CODES.NOT_AUTHORIZED)
-    if (userAuth.permiso !== PERMISOS.ADMIN && user.permiso === PERMISOS.ADMIN) throw new AuthorizationError('No tiene privilegios para cambiar de permiso')
+    if (userAuth.id !== userToUpdate.id && userAuth.permiso !== PERMISOS.ADMIN) throw new AuthorizationError('No puedes modificar un usuario diferente al tuyo', INVALID_AUTH_CODES.NOT_AUTHORIZED)
+    if (userAuth.permiso !== PERMISOS.ADMIN && userToUpdate.permiso === PERMISOS.ADMIN) throw new AuthorizationError('No tiene privilegios para cambiar de permiso')
   }
 }

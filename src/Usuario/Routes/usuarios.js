@@ -5,10 +5,12 @@ import parseRequestForImageUpload from '../../Imagen/Middlewares/parseRequestFor
 import { MwValidateImageType } from '../../Imagen/Middlewares/validateMimeTypes.js'
 /**
  *
- * @param {{usuarioController: import('../Controller/usuarioController.js').default}} param0
+ * @param {Object} param0
+ * @param {import('../Controller/usuarioController.js').default} param0.usuarioController
+ * @param {import('../../Interfaces/Controllers/IAuthCtrl.js').default} param0.IAuthCtrl
  * @returns {Router}
  */
-const createUsuariosRouter = ({ usuarioController }) => {
+const createUsuariosRouter = ({ usuarioController, IAuthCtrl }) => {
   const router = Router()
   router.get('/', usuarioController.getAll)
   router.get('/:id', MwValidateNumericId, usuarioController.get)
@@ -16,17 +18,23 @@ const createUsuariosRouter = ({ usuarioController }) => {
     parseRequestForImageUpload,
     MwValidateImageType,
     MwValidateBodyForAddUsuario,
+    IAuthCtrl.checkPermission,
     usuarioController.add)
-  router.delete('/:id', MwValidateNumericId, usuarioController.delete)
+  router.delete('/:id',
+    MwValidateNumericId,
+    IAuthCtrl.checkPermission,
+    usuarioController.delete)
   router.patch('/:id',
     parseRequestForImageUpload,
     MwValidateImageType,
     MwValidateNumericId,
     MwValidateBodyForUpdateUsuario,
+    IAuthCtrl.checkPermission,
     usuarioController.update)
   router.patch('/password/:id',
     MwValidateNumericId,
     MwValidateNewPassword,
+    IAuthCtrl.checkPermission,
     usuarioController.changePassword)
   return router
 }
